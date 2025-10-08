@@ -1,4 +1,4 @@
-![Podgląd systemu](mapa.png)
+![Podgląd systemu](interface_basic_visualization.png)
 
 # Mapa + czujniki (widok główny)
 
