@@ -66,20 +66,19 @@ func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.AP
 	}
 
 	deviceID := uuid.New().String()
-	secret, secretHash, err := randSecret(24)
+	secret, _, err := randSecret(24)
 	if err != nil {
 		return jsonResp(500, map[string]string{"error": err.Error()})
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)
 	item := map[string]types.AttributeValue{
-		"deviceId":         &types.AttributeValueMemberS{Value: deviceID},
-		"deviceSecret":     &types.AttributeValueMemberS{Value: secret},
-		"deviceSecretHash": &types.AttributeValueMemberS{Value: secretHash},
-		"firstSeen":        &types.AttributeValueMemberS{Value: now},
-		"lastSeen":         &types.AttributeValueMemberS{Value: now},
-		"lat":              &types.AttributeValueMemberN{Value: strconv.FormatFloat(r.Lat, 'f', -1, 64)},
-		"lon":              &types.AttributeValueMemberN{Value: strconv.FormatFloat(r.Lon, 'f', -1, 64)},
+		"deviceId":     &types.AttributeValueMemberS{Value: deviceID},
+		"deviceSecret": &types.AttributeValueMemberS{Value: secret},
+		"firstSeen":    &types.AttributeValueMemberS{Value: now},
+		"lastSeen":     &types.AttributeValueMemberS{Value: now},
+		"lat":          &types.AttributeValueMemberN{Value: strconv.FormatFloat(r.Lat, 'f', -1, 64)},
+		"lon":          &types.AttributeValueMemberN{Value: strconv.FormatFloat(r.Lon, 'f', -1, 64)},
 	}
 
 	_, err = ddb.PutItem(ctx, &dynamodb.PutItemInput{

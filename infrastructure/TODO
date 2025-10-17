@@ -1,0 +1,3 @@
+weryfikacja czujnika, device secret etc.
+bootstrap ec2: env, binarka etc.
+logika w ec2, póki co tylko odbiera z sqs i ddb

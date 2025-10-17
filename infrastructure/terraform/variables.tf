@@ -3,12 +3,7 @@ variable "aws_region" {
   default = "eu-north-1"
 }
 
-variable "project" {
-  type    = string
-  default = "iot-poc"
-}
-
-variable "devices_table_name" {
-  type    = string
-  default = "devices"
+variable "create_ec2_worker" {
+  type    = bool
+  default = true
 }
