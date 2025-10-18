@@ -1,1 +1,92 @@
 package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"time"
+
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/config"
+)
+
+type envelope struct {
+	DeviceID string `json:"deviceId"`
+	TS       string `json:"ts"`
+}
+
+func main() {
+	ctx := context.Background()
+
+	if err := config.Load(); err != nil {
+		log.Fatal(err)
+	}
+
+	awsCfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(config.AppConfig.AWS.Region))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqsCli := sqs.NewFromConfig(awsCfg)
+	ddb := dynamodb.NewFromConfig(awsCfg)
+
+	log.Printf("worker online; queue=%s table=%s", config.AppConfig.AWS.SQSURL, config.AppConfig.AWS.AlertsTable)
+
+	for {
+		out, err := sqsCli.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
+			QueueUrl:            &config.AppConfig.AWS.SQSURL,
+			MaxNumberOfMessages: 1,
+			WaitTimeSeconds:     20,
+			VisibilityTimeout:   60,
+		})
+		if err != nil {
+			log.Printf("receive error: %v", err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		if len(out.Messages) == 0 {
+			continue
+		}
+
+		for _, m := range out.Messages {
+			var env envelope
+			if err := json.Unmarshal([]byte(*m.Body), &env); err != nil {
+				log.Printf("bad message: %v; body=%s", err, *m.Body)
+				continue
+			}
+
+			it, err := ddb.GetItem(ctx, &dynamodb.GetItemInput{
+				TableName: &config.AppConfig.AWS.AlertsTable,
+				Key: map[string]types.AttributeValue{
+					"deviceId": &types.AttributeValueMemberS{Value: env.DeviceID},
+					"ts":       &types.AttributeValueMemberS{Value: env.TS},
+				},
+				ConsistentRead: awsBool(true),
+			})
+			if err != nil {
+				log.Printf("ddb get error: %v", err)
+			}
+
+			fmt.Println("=== ALERT ===")
+			fmt.Printf("deviceId: %s\n", env.DeviceID)
+			fmt.Printf("ts      : %s\n", env.TS)
+			if it.Item != nil {
+				fmt.Printf("ddb.item: %+v\n", it.Item)
+			} else {
+				fmt.Printf("ddb.item: <nil>\n")
+			}
+			fmt.Println("=============")
+
+			_, _ = sqsCli.DeleteMessage(ctx, &sqs.DeleteMessageInput{
+				QueueUrl:      &config.AppConfig.AWS.SQSURL,
+				ReceiptHandle: m.ReceiptHandle,
+			})
+		}
+	}
+}
+
+func awsBool(b bool) *bool { return &b }

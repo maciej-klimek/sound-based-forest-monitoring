@@ -1,6 +1,6 @@
-module register
+module github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/lambda-register
 
-go 1.22
+go 1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0

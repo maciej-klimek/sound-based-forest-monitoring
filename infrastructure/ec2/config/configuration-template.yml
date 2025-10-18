@@ -1,0 +1,5 @@
+aws:
+  region:
+  sqs_url:
+  devices_table:
+  alerts_table:
