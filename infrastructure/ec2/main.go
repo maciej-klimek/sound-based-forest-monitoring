@@ -5,43 +5,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/config"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/config"
 )
 
 type envelope struct {
 	DeviceID string `json:"deviceId"`
 	TS       string `json:"ts"`
-	S3Key    string `json:"s3Key"`
 }
 
 func main() {
 	ctx := context.Background()
 
-	queueURL := os.Getenv("QUEUE_URL")
-	alertsTable := os.Getenv("ALERTS_TABLE")
-	if queueURL == "" || alertsTable == "" {
-		log.Fatalf("missing QUEUE_URL or ALERTS_TABLE")
+	if err := config.Load(); err != nil {
+		log.Fatal(err)
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx)
+	awsCfg, err := awsConfig.LoadDefaultConfig(ctx, awsConfig.WithRegion(config.AppConfig.AWS.Region))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sqsCli := sqs.NewFromConfig(cfg)
-	ddb := dynamodb.NewFromConfig(cfg)
+	sqsCli := sqs.NewFromConfig(awsCfg)
+	ddb := dynamodb.NewFromConfig(awsCfg)
 
-	log.Printf("worker online; queue=%s table=%s", queueURL, alertsTable)
+	log.Printf("worker online; queue=%s table=%s", config.AppConfig.AWS.SQSURL, config.AppConfig.AWS.AlertsTable)
 
 	for {
 		out, err := sqsCli.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-			QueueUrl:            &queueURL,
+			QueueUrl:            &config.AppConfig.AWS.SQSURL,
 			MaxNumberOfMessages: 1,
 			WaitTimeSeconds:     20,
 			VisibilityTimeout:   60,
@@ -63,7 +60,7 @@ func main() {
 			}
 
 			it, err := ddb.GetItem(ctx, &dynamodb.GetItemInput{
-				TableName: &alertsTable,
+				TableName: &config.AppConfig.AWS.AlertsTable,
 				Key: map[string]types.AttributeValue{
 					"deviceId": &types.AttributeValueMemberS{Value: env.DeviceID},
 					"ts":       &types.AttributeValueMemberS{Value: env.TS},
@@ -77,7 +74,6 @@ func main() {
 			fmt.Println("=== ALERT ===")
 			fmt.Printf("deviceId: %s\n", env.DeviceID)
 			fmt.Printf("ts      : %s\n", env.TS)
-			fmt.Printf("s3Key   : %s\n", env.S3Key)
 			if it.Item != nil {
 				fmt.Printf("ddb.item: %+v\n", it.Item)
 			} else {
@@ -86,7 +82,7 @@ func main() {
 			fmt.Println("=============")
 
 			_, _ = sqsCli.DeleteMessage(ctx, &sqs.DeleteMessageInput{
-				QueueUrl:      &queueURL,
+				QueueUrl:      &config.AppConfig.AWS.SQSURL,
 				ReceiptHandle: m.ReceiptHandle,
 			})
 		}

@@ -1,4 +1,4 @@
-module github.com/piotrzapior/sound-based-forest-monitoring/infrastructure/lambda-alert
+module github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/lambda-alert
 
 go 1.24.1
 

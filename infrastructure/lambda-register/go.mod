@@ -1,4 +1,4 @@
-module register
+module github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/lambda-register
 
 go 1.22
 

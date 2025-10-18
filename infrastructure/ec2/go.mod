@@ -1,4 +1,4 @@
-module github.com/piotrzapior/sound-based-forest-monitoring/infrastructure/ec2
+module github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2
 
 go 1.24.1
 
@@ -22,4 +22,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.38.7 // indirect
 	github.com/aws/smithy-go v1.23.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 )

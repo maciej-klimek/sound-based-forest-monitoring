@@ -29,6 +29,22 @@ resource "aws_security_group" "ssh" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "HTTP (frontend)"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Backend API"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -58,6 +74,30 @@ resource "aws_iam_role_policy" "ec2_sqs" {
   })
 }
 
+resource "aws_iam_role_policy" "ec2_ddb" {
+  name = "${local.project}-ec2-ddb"
+  role = aws_iam_role.ec2_role.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect : "Allow",
+      Action : [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchWriteItem"
+      ],
+      Resource : [
+        aws_dynamodb_table.alerts.arn,
+        aws_dynamodb_table.devices.arn
+      ]
+    }]
+  })
+}
+
+
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "${local.project}-ec2-profile"
   role = aws_iam_role.ec2_role.name
@@ -73,10 +113,12 @@ resource "aws_instance" "worker" {
   vpc_security_group_ids      = [aws_security_group.ssh.id]
   associate_public_ip_address = true
 
-  tags = merge(local.tags, { Role = "worker" })
-}
+  user_data = <<-EOF
+  #!/bin/bash
+  set -euxo pipefail
+  dnf -y update
+  dnf -y install unzip
+  EOF
 
-output "worker_public_ip" {
-  value       = aws_instance.worker[0].public_ip
-  description = "Public EC2 IPv4"
+  tags = merge(local.tags, { Role = "worker" })
 }

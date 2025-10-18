@@ -15,7 +15,6 @@ import (
 type msg struct {
 	DeviceID string `json:"deviceId"`
 	TS       string `json:"ts"`
-	S3Key    string `json:"s3Key"`
 }
 
 var (
@@ -50,7 +49,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			continue
 		}
 
-		b, _ := json.Marshal(msg{DeviceID: dev, TS: ts, S3Key: s3k})
+		b, _ := json.Marshal(msg{DeviceID: dev, TS: ts})
 		_, err := sqsCli.SendMessage(ctx, &sqs.SendMessageInput{
 			QueueUrl:       &queueURL,
 			MessageBody:    awsString(string(b)),
