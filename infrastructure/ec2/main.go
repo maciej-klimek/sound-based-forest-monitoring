@@ -2,25 +2,24 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/config"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/handlers"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/queue"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/repository"
 )
 
-type envelope struct {
-	DeviceID string `json:"deviceId"`
-	TS       string `json:"ts"`
-}
-
 func main() {
-	ctx := context.Background()
+	ctx, cancel := signalContext()
+	defer cancel()
 
 	if err := config.Load(); err != nil {
 		log.Fatal(err)
@@ -31,62 +30,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds)
+
 	sqsCli := sqs.NewFromConfig(awsCfg)
-	ddb := dynamodb.NewFromConfig(awsCfg)
+	ddbCli := dynamodb.NewFromConfig(awsCfg)
 
-	log.Printf("worker online; queue=%s table=%s", config.AppConfig.AWS.SQSURL, config.AppConfig.AWS.AlertsTable)
+	repo := repository.NewAlertsRepo(ddbCli, config.AppConfig.AWS.AlertsTable)
+	h := handlers.NewHandler(repo, logger)
 
-	for {
-		out, err := sqsCli.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-			QueueUrl:            &config.AppConfig.AWS.SQSURL,
-			MaxNumberOfMessages: 1,
-			WaitTimeSeconds:     20,
-			VisibilityTimeout:   60,
-		})
-		if err != nil {
-			log.Printf("receive error: %v", err)
-			time.Sleep(2 * time.Second)
-			continue
-		}
-		if len(out.Messages) == 0 {
-			continue
-		}
+	consumer := queue.NewConsumer(sqsCli, config.AppConfig.AWS.SQSURL, h.HandleEnvelope, logger)
 
-		for _, m := range out.Messages {
-			var env envelope
-			if err := json.Unmarshal([]byte(*m.Body), &env); err != nil {
-				log.Printf("bad message: %v; body=%s", err, *m.Body)
-				continue
-			}
-
-			it, err := ddb.GetItem(ctx, &dynamodb.GetItemInput{
-				TableName: &config.AppConfig.AWS.AlertsTable,
-				Key: map[string]types.AttributeValue{
-					"deviceId": &types.AttributeValueMemberS{Value: env.DeviceID},
-					"ts":       &types.AttributeValueMemberS{Value: env.TS},
-				},
-				ConsistentRead: awsBool(true),
-			})
-			if err != nil {
-				log.Printf("ddb get error: %v", err)
-			}
-
-			fmt.Println("=== ALERT ===")
-			fmt.Printf("deviceId: %s\n", env.DeviceID)
-			fmt.Printf("ts      : %s\n", env.TS)
-			if it.Item != nil {
-				fmt.Printf("ddb.item: %+v\n", it.Item)
-			} else {
-				fmt.Printf("ddb.item: <nil>\n")
-			}
-			fmt.Println("=============")
-
-			_, _ = sqsCli.DeleteMessage(ctx, &sqs.DeleteMessageInput{
-				QueueUrl:      &config.AppConfig.AWS.SQSURL,
-				ReceiptHandle: m.ReceiptHandle,
-			})
-		}
-	}
+	logger.Printf("worker online; queue=%s table=%s", config.AppConfig.AWS.SQSURL, config.AppConfig.AWS.AlertsTable)
+	consumer.Run(ctx)
 }
 
-func awsBool(b bool) *bool { return &b }
+func signalContext() (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(context.Background())
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-ch
+		cancel()
+	}()
+	return ctx, cancel
+}
