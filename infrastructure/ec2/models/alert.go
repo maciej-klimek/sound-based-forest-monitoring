@@ -1,4 +1,4 @@
-package model
+package models
 
 type Envelope struct {
 	DeviceID string `json:"deviceId"`

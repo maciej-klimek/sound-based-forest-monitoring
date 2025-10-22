@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	models "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
 )
 
 type HandlerFunc func(ctx context.Context, env models.Envelope) error

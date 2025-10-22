@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	models "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/repository"
 )
 

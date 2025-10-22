@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	models "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
 )
 
 type AlertsRepo struct {
