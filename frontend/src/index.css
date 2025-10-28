@@ -1,1 +1,94 @@
 @import "tailwindcss";
+
+/* Wygląd niestandardowego znacznika sensora */
+.leaflet-div-icon {
+  background: transparent;
+  border: 0;
+}
+
+.sensor-wrap {
+  position: relative;
+  width: 60px;           /* hitbox ikony */
+  height: 40px;
+  /* UWAGA: teraz NIE przesuwamy translate, kotwiczymy kotwicą Leafleta */
+  pointer-events: auto;  /* pozwól na kliknięcia -> popup zadziała */
+}
+
+.sensor-dot {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  border-radius: 9999px;
+  background: #111827;           /* ciemny punkt w środku */
+  border: 2px solid #fff;         /* obwódka */
+  box-shadow: 0 1px 6px rgba(0,0,0,.25);
+}
+
+.sensor-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: -18px;                     /* nad kropką */
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 2px 6px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #111827;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+.sensor-label--red    { border-color: #fecaca; color: #991b1b; }
+.sensor-label--amber  { border-color: #fde68a; color: #92400e; }
+.sensor-label--green  { border-color: #bbf7d0; color: #065f46; }
+
+
+/* karta / panel */
+.card {
+  @apply bg-white rounded-[24px] shadow;
+}
+
+/* list item pastelowy */
+.pastel {
+  @apply rounded-[14px] px-4 py-3 border;
+}
+.pastel-rose   { @apply bg-rose-50   border-rose-200; }
+.pastel-amber  { @apply bg-amber-50  border-amber-200; }
+.pastel-orange { @apply bg-orange-50 border-orange-200; }
+.pastel-neutral{ @apply bg-zinc-100  border-zinc-200; }
+
+/* ikony Leaflet */
+.leaflet-div-icon { background: transparent; border: 0; }
+
+/* niestandardowe znaczniki */
+.sensor-wrap { position: relative; width: 60px; height: 40px; pointer-events: auto; }
+.sensor-dot {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 10px; height: 10px; border-radius: 9999px; background: #111827; border: 2px solid #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,.25);
+}
+.sensor-label {
+  position: absolute; left: 50%; transform: translateX(-50%); top: -18px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 2px 6px;
+  font-weight: 700; font-size: 12px; color: #111827; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.sensor-label--red    { border-color: #fecaca; color: #991b1b; }
+.sensor-label--amber  { border-color: #fde68a; color: #92400e; }
+.sensor-label--green  { border-color: #bbf7d0; color: #065f46; }
+
+/* trójkąt alertu (A1) */
+.alert-triangle {
+  width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent;
+  border-bottom: 22px solid #ef4444; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.25));
+}
+.alert-badge {
+  position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+  background:#111; color:#fff; font-weight:700; font-size:12px; padding:2px 6px; border-radius:8px;
+}
+
+
+.sensor-wrap { cursor: pointer; }
