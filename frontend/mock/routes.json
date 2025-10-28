@@ -1,6 +1,10 @@
 {
-  "/api/alerts*": "/alerts$1",
-  "/api/sensors*": "/sensors$1",
-  "/api/heatmap*": "/heatmap$1",
-  "/api/health": "/health"
+  "routes": {
+    "/api/sensors": "/sensors",
+    "/api/alerts": "/alerts",
+    "/api/triangulations": "/triangulations",
+    "/api/sensors/:id": "/sensors/:id",
+    "/api/alerts/:id": "/alerts/:id",
+    "/api/triangulations/:id": "/triangulations/:id"
+  }
 }

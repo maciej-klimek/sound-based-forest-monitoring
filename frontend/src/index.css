@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Wygląd niestandardowego znacznika sensora */
 .leaflet-div-icon {
   background: transparent;
   border: 0;
@@ -10,7 +9,6 @@
   position: relative;
   width: 60px;           /* hitbox ikony */
   height: 40px;
-  /* UWAGA: teraz NIE przesuwamy translate, kotwiczymy kotwicą Leafleta */
   pointer-events: auto;  /* pozwól na kliknięcia -> popup zadziała */
 }
 

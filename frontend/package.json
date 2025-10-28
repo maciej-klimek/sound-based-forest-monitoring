@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n VITE,MOCK -c auto \"vite\" \"json-server --watch mock/db.json --port 4000\"",
+    "dev": "concurrently -k -n VITE,API -c auto \"vite\" \"json-server --watch mock/db.json --port 4000\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

@@ -1,4 +1,3 @@
-// src/components/HistoryList.jsx
 import { useEffect, useMemo, useState } from "react";
 
 export default function HistoryList({ items: itemsProp, onShow }) {
@@ -44,12 +43,13 @@ export default function HistoryList({ items: itemsProp, onShow }) {
         if (alive) setLoading(false);
       }
     })();
-    return () => (alive = false);
+    return () => { alive = false; };
   }, [itemsProp, q, sortField, sortDir, page, limit]);
 
   const rowClass = (severity) =>
-    severity === "high" ? "pastel pastel-rose" :
-    severity === "medium" ? "pastel pastel-amber" : "pastel pastel-neutral";
+    severity === "high" ? "pastel pastel-rose"
+    : severity === "medium" ? "pastel pastel-amber"
+    : "pastel pastel-neutral";
 
   const normalized = useMemo(
     () =>
@@ -80,7 +80,7 @@ export default function HistoryList({ items: itemsProp, onShow }) {
         />
         <select
           value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
+          onChange={(e) => { setPage(1); setSortField(e.target.value); }}
           className="border rounded-lg px-2 py-2 text-sm"
         >
           <option value="createdAt">czas</option>
@@ -89,7 +89,7 @@ export default function HistoryList({ items: itemsProp, onShow }) {
         </select>
         <select
           value={sortDir}
-          onChange={(e) => setSortDir(e.target.value)}
+          onChange={(e) => { setPage(1); setSortDir(e.target.value); }}
           className="border rounded-lg px-2 py-2 text-sm"
         >
           <option value="desc">malejąco</option>
@@ -104,6 +104,9 @@ export default function HistoryList({ items: itemsProp, onShow }) {
           <option value={20}>20 / stronę</option>
           <option value={50}>50 / stronę</option>
         </select>
+        <div className="text-xs text-zinc-500 ml-auto">
+          {normalized.length} / {total}
+        </div>
       </div>
 
       {loading && <div className="text-sm text-zinc-500">ładowanie…</div>}
@@ -112,26 +115,31 @@ export default function HistoryList({ items: itemsProp, onShow }) {
       <div className="space-y-4">
         {normalized.map((it) => (
           <button
-            key={it.id + (it.startedAt || "")}
+            key={`${it.id}-${it.startedAt || ""}-${it.endedAt || ""}`}
             onClick={() => onShow?.(it)}
             className={`w-full text-left ${rowClass(it.severity)}`}
-            title="Pokaż szczegóły"
+            title="Pokaż szczegóły alertu"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="font-extrabold">{it.id}</div>
+            <div className="grid md:grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3">
+              <div className="font-extrabold text-[20px] md:mr-2">{it.id}</div>
+
               <div className="text-sm">
-                <span className="text-zinc-500 mr-1">Włączył się:</span> {it.startedAt || it.createdAt}
+                <span className="text-zinc-500 mr-1">Włączył się:</span> {it.startedAt || it.createdAt || "—"}
                 {it.endedAt && (
                   <>
                     <span className="text-zinc-500 mx-1">/ Wyłączył się:</span> {it.endedAt}
                   </>
                 )}
               </div>
-              <div className="text-sm">
-                <span className="text-zinc-500">Lat:</span> {it.lat.toFixed(4)}{" "}
-                <span className="text-zinc-500 ml-2">Lon:</span> {it.lon.toFixed(4)}
+
+              <div className="text-sm md:text-right">
+                <span className="text-zinc-500">Lat:</span> {Number(it.lat).toFixed(4)}
               </div>
-              <div className="text-sm">
+              <div className="text-sm md:text-right">
+                <span className="text-zinc-500">Lon:</span> {Number(it.lon).toFixed(4)}
+              </div>
+
+              <div className="text-sm md:text-right">
                 <span className="text-zinc-500">Score:</span> {it.score}
               </div>
             </div>
