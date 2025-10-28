@@ -8,18 +8,20 @@ import (
 	"github.com/fogleman/gg"
 )
 
+// syzyf ze skalowaniem tego ekstremalny xdd
+
 func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 	Lat, Lon float64
 	Group    []int
 }, filename string) error {
 	const margin = 500
-	const pixelsPerMeter = 1.0 // 1 metr = 1 px, możesz zmienić jeśli chcesz większe powiększenie
+	const pixelsPerMeter = 1.0 // 1 metr = 1 px (chyba XD)
 
 	if len(sensors) == 0 {
 		return fmt.Errorf("no sensors to visualize")
 	}
 
-	// minimalne i maksymalne współrzędne
+	// minimalne i maksymalne cordy
 	minLat, maxLat := sensors[0].Latitude, sensors[0].Latitude
 	minLon, maxLon := sensors[0].Longitude, sensors[0].Longitude
 	for _, s := range sensors {
@@ -63,15 +65,21 @@ func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 	dc.SetColor(color.White)
 	dc.Clear()
 
-	// rysujemy wszystkie czujniki
+	//czujniki
 	for _, s := range sensors {
 		x, y := project(s.Latitude, s.Longitude)
+
+		// kropka czujnika
 		dc.SetColor(color.Black)
 		dc.DrawCircle(x, y, 5)
 		dc.Fill()
+
+		// numer czujnika nad kropką
+		dc.SetColor(color.Black)
+		dc.DrawStringAnchored(fmt.Sprintf("%d", s.ID), x, y-20, 2, 2)
 	}
 
-	// linie między aktywnymi czujnikami
+	// linie y aktywnymi czujnikami (do wywalenia potem)
 	for i := 0; i < len(alerts); i++ {
 		for j := i + 1; j < len(alerts); j++ {
 			x1, y1 := project(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude)
@@ -91,7 +99,7 @@ func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 		}
 	}
 
-	// aktywne alerty jako okręgi z promieniami
+	// aktywne alerty jako okręgi z promieniami SYZYF ZE SKALOWANIEM
 	for _, a := range alerts {
 		x, y := project(a.Sensor.Latitude, a.Sensor.Longitude)
 		radiusPixels := a.Distance * pixelsPerMeter
@@ -112,7 +120,7 @@ func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 	for _, s := range sources {
 		x, y := project(s.Lat, s.Lon)
 		dc.SetColor(color.RGBA{0, 255, 0, 255})
-		dc.DrawCircle(x, y, 7)
+		dc.DrawCircle(x, y, 20)
 		dc.Fill()
 	}
 

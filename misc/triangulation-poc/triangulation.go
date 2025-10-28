@@ -21,6 +21,7 @@ func TriangulateCliques(alerts []ActiveAlert) []struct {
 		overlap[i] = make([]bool, n)
 	}
 
+	// Przekminic czy to musi byc w ogole
 	const overlapTolerance = 1.05 // 5% margines
 
 	totalOverlaps := 0
@@ -47,14 +48,14 @@ func TriangulateCliques(alerts []ActiveAlert) []struct {
 		}
 	}
 
-	fmt.Printf("\nZnaleziono %d par nakładających się alertów\n\n", totalOverlaps)
+	fmt.Printf("\nFound %d overlaping pairs of alerts\n\n", totalOverlaps)
 
 	var results []struct {
 		Lat, Lon float64
 		Group    []int
 	}
 
-	// Bron–Kerbosch algorithm for maximal cliques
+	// Bron–Kerbosch algorithm for maximal cliques (chyba dziolo)
 	var bronKerbosch func(r, p, x []int)
 	bronKerbosch = func(r, p, x []int) {
 		if len(p) == 0 && len(x) == 0 && len(r) >= 3 {

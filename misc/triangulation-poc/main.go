@@ -9,8 +9,8 @@ func main() {
 	sensors, _ := LoadSensors()
 	alerts, _ := LoadAlerts()
 
-	currentTime := time.Date(2025, 10, 8, 17, 6, 0, 0, time.UTC)
-	alertDuration := 10 * time.Minute
+	currentTime := time.Date(2025, 10, 8, 17, 12, 0, 0, time.UTC)
+	alertDuration := 15 * time.Minute
 
 	fmt.Println("Simulation time:", currentTime.Format("15:04"))
 	active := ActiveAlerts(currentTime, alerts, sensors, alertDuration)

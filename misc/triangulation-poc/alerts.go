@@ -11,12 +11,12 @@ type Alert struct {
 	ID        int     `json:"id"`
 	SensorID  int     `json:"sensor_id"`
 	Timestamp string  `json:"timestamp"`
-	Distance  float64 `json:"distance"` // in meters
+	Distance  float64 `json:"distance"`
 }
 
 type ActiveAlert struct {
 	Sensor   Sensor
-	Distance float64 // meters
+	Distance float64
 }
 
 func LoadAlerts() ([]Alert, error) {
