@@ -11,12 +11,12 @@ type Alert struct {
 	ID        int     `json:"id"`
 	SensorID  int     `json:"sensor_id"`
 	Timestamp string  `json:"timestamp"`
-	Score     float64 `json:"score"`
+	Distance  float64 `json:"distance"` // in meters
 }
 
 type ActiveAlert struct {
-	Sensor Sensor
-	Score  float64
+	Sensor   Sensor
+	Distance float64 // meters
 }
 
 func LoadAlerts() ([]Alert, error) {
@@ -46,7 +46,7 @@ func ActiveAlerts(current time.Time, alerts []Alert, sensors []Sensor, duration 
 		if current.After(t) && current.Before(t.Add(duration)) {
 			for _, s := range sensors {
 				if s.ID == a.SensorID {
-					active = append(active, ActiveAlert{Sensor: s, Score: a.Score})
+					active = append(active, ActiveAlert{Sensor: s, Distance: a.Distance})
 				}
 			}
 		}

@@ -23,17 +23,24 @@ func main() {
 	fmt.Println("Active alerts:")
 	for _, a := range active {
 		fmt.Printf("- Sensor %d (%.5f, %.5f), score=%.1f\n",
-			a.Sensor.ID, a.Sensor.Latitude, a.Sensor.Longitude, a.Score)
+			a.Sensor.ID, a.Sensor.Latitude, a.Sensor.Longitude, a.Distance)
 	}
 
 	sources := TriangulateCliques(active)
 	if len(sources) == 0 {
 		fmt.Println("No full cliques found")
-		return
 	}
 
 	for _, s := range sources {
 		fmt.Printf("\nPotential sound source: (%.5f, %.5f)\n", s.Lat, s.Lon)
 		fmt.Printf("Sensors: %v\n", s.Group)
 	}
+
+	err := Visualize(sensors, active, sources, "output.png")
+	if err != nil {
+		fmt.Println("Error saving visualization:", err)
+	} else {
+		fmt.Println("Visualization saved to output.png")
+	}
+
 }

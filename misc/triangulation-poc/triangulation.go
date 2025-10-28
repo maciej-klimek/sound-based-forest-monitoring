@@ -1,15 +1,9 @@
 package main
 
-import (
-	"math"
-)
-
-func ScoreToRadius(score float64) float64 {
-	return score / 111000.0
-}
+import "fmt"
 
 func Distance(aLat, aLon, bLat, bLon float64) float64 {
-	return math.Sqrt(math.Pow(aLat-bLat, 2) + math.Pow(aLon-bLon, 2))
+	return Haversine(aLat, aLon, bLat, bLon) // meters
 }
 
 func TriangulateCliques(alerts []ActiveAlert) []struct {
@@ -21,29 +15,46 @@ func TriangulateCliques(alerts []ActiveAlert) []struct {
 		return nil
 	}
 
+	// overlap[i][j] = true if alert i and j overlap (distance ≤ sum of radii)
 	overlap := make([][]bool, n)
 	for i := range overlap {
 		overlap[i] = make([]bool, n)
 	}
 
+	const overlapTolerance = 1.05 // 5% margines
+
+	totalOverlaps := 0
+
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
-			dist := Distance(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude,
-				alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude)
-			radiusA := ScoreToRadius(alerts[i].Score)
-			radiusB := ScoreToRadius(alerts[j].Score)
-			if dist <= radiusA+radiusB {
+			dist := Distance(
+				alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude,
+				alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude,
+			)
+
+			radiusA := alerts[i].Distance
+			radiusB := alerts[j].Distance
+
+			overlaps := dist <= (radiusA+radiusB)*overlapTolerance
+			if overlaps {
 				overlap[i][j] = true
 				overlap[j][i] = true
+				totalOverlaps++
 			}
+
+			fmt.Printf("i=%d j=%d dist=%.2fm radiusA=%.2fm radiusB=%.2fm -> overlap=%v\n",
+				i, j, dist, radiusA, radiusB, overlaps)
 		}
 	}
+
+	fmt.Printf("\nZnaleziono %d par nakładających się alertów\n\n", totalOverlaps)
 
 	var results []struct {
 		Lat, Lon float64
 		Group    []int
 	}
 
+	// Bron–Kerbosch algorithm for maximal cliques
 	var bronKerbosch func(r, p, x []int)
 	bronKerbosch = func(r, p, x []int) {
 		if len(p) == 0 && len(x) == 0 && len(r) >= 3 {
