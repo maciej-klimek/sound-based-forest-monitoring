@@ -1,0 +1,6 @@
+{
+  "/api/alerts*": "/alerts$1",
+  "/api/sensors*": "/sensors$1",
+  "/api/heatmap*": "/heatmap$1",
+  "/api/health": "/health"
+}

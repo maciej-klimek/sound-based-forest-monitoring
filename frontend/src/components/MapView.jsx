@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+// src/components/MapView.jsx
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -52,9 +53,44 @@ function alertIcon(label = "A1") {
   });
 }
 
-export default function MapView({ sensors = [], alerts = [], mapRef }) {
+export default function MapView({ sensors: sensorsProp = [], alerts: alertsProp = [], mapRef }) {
+  const [sensors, setSensors] = useState(sensorsProp);
+  const [alerts, setAlerts] = useState(alertsProp);
+  const [loading, setLoading] = useState(!sensorsProp?.length || !alertsProp?.length);
+
+  // Pobierz dane tylko jeśli nie przyszły przez propsy
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        if (!sensorsProp?.length) {
+          const resS = await fetch("/api/sensors");
+          if (resS.ok) {
+            const dataS = await resS.json();
+            if (alive) setSensors(Array.isArray(dataS) ? dataS : []);
+          }
+        } else {
+          setSensors(sensorsProp);
+        }
+
+        if (!alertsProp?.length) {
+          const resA = await fetch("/api/alerts?status=active&_limit=100&_sort=createdAt&_order=desc");
+          if (resA.ok) {
+            const dataA = await resA.json();
+            if (alive) setAlerts(Array.isArray(dataA) ? dataA : []);
+          }
+        } else {
+          setAlerts(alertsProp);
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => (alive = false);
+  }, [sensorsProp, alertsProp]);
+
   const bounds = useMemo(
-    () => (sensors.length ? L.latLngBounds(sensors.map((s) => [s.lat, s.lon])) : null),
+    () => (sensors?.length ? L.latLngBounds(sensors.map((s) => [s.lat, s.lon])) : null),
     [sensors]
   );
 
@@ -154,7 +190,7 @@ export default function MapView({ sensors = [], alerts = [], mapRef }) {
         {/* okręgi */}
         {showCircles &&
           sensors.map((s) => {
-            const c = colorByScore(s.score);
+            const c = colorByScore(s.score ?? 0);
             return (
               <Circle
                 key={`${s.id}-circle`}
@@ -171,7 +207,7 @@ export default function MapView({ sensors = [], alerts = [], mapRef }) {
             <Marker
               key={s.id}
               position={[s.lat, s.lon]}
-              icon={sensorIcon(s.id, s.score)}
+              icon={sensorIcon(s.id, s.score ?? 0)}
               ref={(el) => {
                 if (el) markersRef.current[s.id] = el;
               }}
@@ -180,9 +216,9 @@ export default function MapView({ sensors = [], alerts = [], mapRef }) {
                 <div className="space-y-1">
                   <div className="font-semibold">{s.id}</div>
                   <div>
-                    Lat: {s.lat.toFixed(4)} Lon: {s.lon.toFixed(4)}
+                    Lat: {Number(s.lat).toFixed(4)} Lon: {Number(s.lon).toFixed(4)}
                   </div>
-                  <div>Score: {s.score}</div>
+                  {typeof s.score === "number" && <div>Score: {s.score}</div>}
                 </div>
               </Popup>
             </Marker>
@@ -191,7 +227,6 @@ export default function MapView({ sensors = [], alerts = [], mapRef }) {
         {/* źródła (trójkąty) */}
         {showAlerts &&
           alerts
-            .filter((a) => a.id.startsWith("A"))
             .map((a) => (
               <Marker key={a.id} position={[a.lat, a.lon]} icon={alertIcon(a.id)}>
                 <Popup>
@@ -206,6 +241,12 @@ export default function MapView({ sensors = [], alerts = [], mapRef }) {
               </Marker>
             ))}
       </MapContainer>
+
+      {loading && (
+        <div className="absolute inset-0 grid place-items-center pointer-events-none">
+          <div className="bg-white/80 px-4 py-2 rounded-xl border shadow">ładowanie mapy…</div>
+        </div>
+      )}
     </div>
   );
 }

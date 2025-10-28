@@ -1,0 +1,59 @@
+{
+  "alerts": [
+    {
+      "id": "ALR-2025-10-28-0001",
+      "type": "chainsaw",
+      "score": 0.92,
+      "status": "active",
+      "sensorId": "SEN-CLW001",
+      "lat": 49.83421,
+      "lon": 19.94077,
+      "estimatedDistanceM": 380,
+      "audioUrl": "/audio/chainsaw.mp3",
+      "createdAt": "2025-10-28T13:45:12Z",
+      "meta": { "splDb": 86.4, "model": "yamnet-tflite", "threshold": 0.8 }
+    },
+    {
+      "id": "ALR-2025-10-27-0103",
+      "type": "truck",
+      "score": 0.71,
+      "status": "resolved",
+      "sensorId": "SEN-CLW002",
+      "lat": 49.83612,
+      "lon": 19.94401,
+      "audioUrl": null,
+      "createdAt": "2025-10-27T10:12:05Z",
+      "meta": { "splDb": 74.1, "model": "yamnet-tflite", "threshold": 0.8 }
+    }
+  ],
+  "sensors": [
+    {
+      "id": "SEN-CLW001",
+      "name": "CLW001",
+      "lat": 49.83421,
+      "lon": 19.94077,
+      "status": "online",
+      "battery": 0.78,
+      "lastHeard": "2025-10-28T13:44:00Z",
+      "hw": { "mic": "ICS-43434", "board": "Raspberry Pi Zero 2 W" }
+    },
+    {
+      "id": "SEN-CLW002",
+      "name": "CLW002",
+      "lat": 49.83612,
+      "lon": 19.94401,
+      "status": "degraded",
+      "battery": 0.42,
+      "lastHeard": "2025-10-28T13:30:00Z",
+      "hw": { "mic": "ICS-43434", "board": "Raspberry Pi Zero 2 W" }
+    }
+  ],
+  "heatmap": {
+    "grid": 200,
+    "cells": [
+      { "x": 120, "y": 88, "value": 0.73 },
+      { "x": 121, "y": 88, "value": 0.41 }
+    ]
+  },
+  "health": { "status": "ok", "time": "2025-10-28T14:00:00Z" }
+}
