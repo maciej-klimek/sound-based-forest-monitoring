@@ -1,4 +1,3 @@
-// src/pages/HistoryPage.jsx
 import { useState } from "react";
 import AlertsPanel from "../components/AlertsPanel";
 import HistoryList from "../components/HistoryList";

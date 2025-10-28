@@ -1,4 +1,3 @@
-// src/pages/MapPage.jsx
 import { useRef, useState } from "react";
 import MapView from "../components/MapView";
 import AlertsPanel from "../components/AlertsPanel";

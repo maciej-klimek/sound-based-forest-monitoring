@@ -13,7 +13,6 @@ import SearchBox from "./SearchBox";
 
 const colorByScore = (v) => (v >= 85 ? "#ef4444" : v >= 70 ? "#f59e0b" : "#65a30d");
 
-// ✅ ikona CZUJNIKA – zielone kółko
 function sensorIcon(name, score) {
   const color = colorByScore(score);
   const html = `
@@ -32,7 +31,6 @@ function sensorIcon(name, score) {
   });
 }
 
-// 🔺 ikona ŹRÓDŁA – czerwony trójkąt
 function alertIcon(label = "A1") {
   const html = `
     <div class="sensor-wrap" style="text-align:center">
