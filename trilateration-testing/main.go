@@ -26,14 +26,12 @@ func main() {
 			a.Sensor.ID, a.Sensor.Latitude, a.Sensor.Longitude, a.Distance)
 	}
 
-	sources := FindPotentialSources(active)
+	sources := FindPotentialSources(active, 2) // 2 overlapping pairs minimum
 	if len(sources) == 0 {
-		fmt.Println("No full cliques found")
-		return
+		fmt.Println("No potential sources found")
 	}
 
-	sources = mergeGroups(sources, 2)
-
+	sources = mergeGroups(sources, 2) // merge groups sharing 2 sensors
 	for _, s := range sources {
 		fmt.Printf("\nPotential sound source: (%.5f, %.5f)\n", s.Lat, s.Lon)
 		fmt.Printf("Sensors: %v\n", s.Sensors)

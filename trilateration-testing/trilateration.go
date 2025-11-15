@@ -5,7 +5,7 @@ type SourceGroup struct {
 	Sensors  []int
 }
 
-func FindPotentialSources(alerts []ActiveAlert) []SourceGroup {
+func FindPotentialSources(alerts []ActiveAlert, minOverlaps int) []SourceGroup {
 	n := len(alerts)
 	if n < 3 {
 		return nil
@@ -35,18 +35,20 @@ func FindPotentialSources(alerts []ActiveAlert) []SourceGroup {
 	var bronKerbosch func(r, p, x []int)
 	bronKerbosch = func(r, p, x []int) {
 		if len(p) == 0 && len(x) == 0 && len(r) >= 3 {
-			sumLat, sumLon := 0.0, 0.0
-			sensors := make([]int, len(r))
-			for i, idx := range r {
-				sumLat += alerts[idx].Sensor.Latitude
-				sumLon += alerts[idx].Sensor.Longitude
-				sensors[i] = alerts[idx].Sensor.ID
+			if validGroup(r, overlap, minOverlaps) {
+				sumLat, sumLon := 0.0, 0.0
+				sensors := make([]int, len(r))
+				for i, idx := range r {
+					sumLat += alerts[idx].Sensor.Latitude
+					sumLon += alerts[idx].Sensor.Longitude
+					sensors[i] = alerts[idx].Sensor.ID
+				}
+				results = append(results, SourceGroup{
+					Lat:     sumLat / float64(len(r)),
+					Lon:     sumLon / float64(len(r)),
+					Sensors: sensors,
+				})
 			}
-			results = append(results, SourceGroup{
-				Lat:     sumLat / float64(len(r)),
-				Lon:     sumLon / float64(len(r)),
-				Sensors: sensors,
-			})
 			return
 		}
 
@@ -65,6 +67,19 @@ func FindPotentialSources(alerts []ActiveAlert) []SourceGroup {
 	bronKerbosch([]int{}, all, []int{})
 
 	return results
+}
+
+// Check if a group has at least minOverlaps overlapping pairs
+func validGroup(indices []int, overlap [][]bool, minOverlaps int) bool {
+	count := 0
+	for i := 0; i < len(indices); i++ {
+		for j := i + 1; j < len(indices); j++ {
+			if overlap[indices[i]][indices[j]] {
+				count++
+			}
+		}
+	}
+	return count >= minOverlaps
 }
 
 func mergeGroups(groups []SourceGroup, minShared int) []SourceGroup {
