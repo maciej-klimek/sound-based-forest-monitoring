@@ -26,13 +26,9 @@ func randFloat(min, max float64) float64 {
 }
 
 func main() {
-	// --------------------------------------
-	// CONFIGURATION
-	// --------------------------------------
 	numSensors := 50
-	numAlerts := 30 // must be <= numSensors
+	numAlerts := 30
 	activeTime := "2025-10-08T17:00:00Z"
-	// --------------------------------------
 
 	if numAlerts > numSensors {
 		fmt.Printf("WARNING: numAlerts > numSensors, limiting alerts to %d\n", numSensors)
@@ -41,15 +37,10 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	// SENSOR RANGE
-	minLat, maxLat := 50.03, 50.09
+	minLat, maxLat := 50.03, 50.08
 	minLon, maxLon := 19.89, 19.99
 
-	// --------------------------------------
-	// GENERATE SENSORS
-	// --------------------------------------
 	sensors := make([]Sensor, numSensors)
-
 	for i := 0; i < numSensors; i++ {
 		sensors[i] = Sensor{
 			ID:        i + 1,
@@ -62,22 +53,20 @@ func main() {
 	os.WriteFile("sensors.json", sensorsJSON, 0644)
 	fmt.Println("Generated sensors.json")
 
-	// --------------------------------------
-	// GENERATE ALERTS – one alert per sensor
-	// --------------------------------------
 	os.MkdirAll("alerts", 0755)
 
-	// convert base time to time.Time
-	baseTime, _ := time.Parse(time.RFC3339, activeTime)
+	entries, err := os.ReadDir("alerts")
+	if err == nil {
+		for _, entry := range entries {
+			os.Remove("alerts/" + entry.Name())
+		}
+	}
 
-	// shuffle sensor indices so each alert gets a unique sensor
+	baseTime, _ := time.Parse(time.RFC3339, activeTime)
 	sensorOrder := rand.Perm(numSensors)
 
 	for i := 0; i < numAlerts; i++ {
-
-		s := sensors[sensorOrder[i]] // unique sensor
-
-		// offset each alert by up to 30 seconds
+		s := sensors[sensorOrder[i]]
 		t := baseTime.Add(time.Duration(rand.Intn(30)) * time.Second)
 
 		alert := Alert{
@@ -87,7 +76,6 @@ func main() {
 			Distance:  randFloat(250, 700),
 		}
 
-		// filename in your style: HHMMSS + two random digits
 		filenameID := t.Format("150405") + fmt.Sprintf("%02d", rand.Intn(99))
 		filename := fmt.Sprintf("alerts/%s.json", filenameID)
 
@@ -97,8 +85,5 @@ func main() {
 		fmt.Println("Created", filename, " (sensor:", s.ID, ")")
 	}
 
-	fmt.Printf(
-		"\nGenerated %d sensors and %d alerts.\nAll alerts active around %s\n",
-		numSensors, numAlerts, activeTime,
-	)
+	fmt.Printf("\nGenerated %d sensors and %d alerts.\nAll alerts active around %s\n", numSensors, numAlerts, activeTime)
 }

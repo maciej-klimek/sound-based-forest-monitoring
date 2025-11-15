@@ -29,11 +29,14 @@ func main() {
 	sources := FindPotentialSources(active)
 	if len(sources) == 0 {
 		fmt.Println("No full cliques found")
+		return
 	}
+
+	sources = mergeGroups(sources, 2)
 
 	for _, s := range sources {
 		fmt.Printf("\nPotential sound source: (%.5f, %.5f)\n", s.Lat, s.Lon)
-		fmt.Printf("Sensors: %v\n", s.Group)
+		fmt.Printf("Sensors: %v\n", s.Sensors)
 	}
 
 	err := Visualize(sensors, active, sources, "output.png")
@@ -42,5 +45,4 @@ func main() {
 	} else {
 		fmt.Println("Visualization saved to output.png")
 	}
-
 }

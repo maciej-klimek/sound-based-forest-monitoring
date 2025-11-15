@@ -10,10 +10,8 @@ import (
 
 // syzyf ze skalowaniem tego ekstremalny xdd
 
-func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
-	Lat, Lon float64
-	Group    []int
-}, filename string) error {
+func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []SourceGroup, filename string) error {
+
 	const margin = 500
 	const pixelsPerMeter = 1.0 // 1 metr = 1 px (chyba XD)
 
@@ -120,7 +118,7 @@ func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 	for _, s := range sources {
 		x, y := project(s.Lat, s.Lon)
 		dc.SetColor(color.RGBA{0, 255, 0, 255})
-		dc.DrawCircle(x, y, 20)
+		dc.DrawCircle(x, y, 50)
 		dc.Fill()
 	}
 

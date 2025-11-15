@@ -15,3 +15,7 @@ func Haversine(lat1, lon1, lat2, lon2 float64) float64 {
 
 	return R * c
 }
+
+func Distance(aLat, aLon, bLat, bLon float64) float64 {
+	return Haversine(aLat, aLon, bLat, bLon)
+}
