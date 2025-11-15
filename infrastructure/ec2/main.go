@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/config"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/handlers"
+	processor "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/processor"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/queue"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/repository"
 )
@@ -36,7 +38,10 @@ func main() {
 	ddbCli := dynamodb.NewFromConfig(awsCfg)
 
 	repo := repository.NewAlertsRepo(ddbCli, config.AppConfig.AWS.AlertsTable)
-	h := handlers.NewHandler(repo, logger)
+
+	// tu narazie ustawiasz ttl dla kazdego alertu
+	mem := processor.NewMemory(5 * time.Minute)
+	h := handlers.NewHandler(repo, mem, logger)
 
 	consumer := queue.NewConsumer(sqsCli, config.AppConfig.AWS.SQSURL, h.HandleEnvelope, logger)
 

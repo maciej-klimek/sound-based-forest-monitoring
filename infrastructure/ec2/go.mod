@@ -9,7 +9,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.9
 )
 
-require github.com/aws/aws-sdk-go-v2/service/dynamodbstreams v1.31.1 // indirect
+require (
+	github.com/aws/aws-sdk-go-v2/service/dynamodbstreams v1.31.1 // indirect
+	github.com/fogleman/gg v1.3.0 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	golang.org/x/image v0.33.0 // indirect
+)
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.39.3 // indirect
