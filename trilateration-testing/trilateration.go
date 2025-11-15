@@ -17,7 +17,7 @@ func FindPotentialSources(alerts []ActiveAlert, minOverlaps int) []SourceGroup {
 		overlap[i] = make([]bool, n)
 	}
 
-	const overlapTolerance = 1.05
+	const overlapTolerance = 1.3
 
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {

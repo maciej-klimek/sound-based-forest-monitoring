@@ -26,7 +26,7 @@ func main() {
 			a.Sensor.ID, a.Sensor.Latitude, a.Sensor.Longitude, a.Distance)
 	}
 
-	sources := FindPotentialSources(active, 2) // 2 overlapping pairs minimum
+	sources := FindPotentialSources(active, 1) // 2 overlapping pairs minimum
 	if len(sources) == 0 {
 		fmt.Println("No potential sources found")
 	}
