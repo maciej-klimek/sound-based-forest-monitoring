@@ -4,15 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n VITE,API -c auto \"vite\" \"json-server --watch mock/db.json --port 4000\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.15",
+    "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.9.4",
     "tailwindcss": "^4.1.15"
   },
   "devDependencies": {
@@ -20,10 +24,12 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "json-server": "^1.0.0-beta.3",
     "vite": "^7.1.7"
   }
 }
