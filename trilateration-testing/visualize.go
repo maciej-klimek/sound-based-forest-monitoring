@@ -79,25 +79,25 @@ func Visualize(sensors []Sensor, alerts []ActiveAlert, sources []struct {
 		dc.DrawStringAnchored(fmt.Sprintf("%d", s.ID), x, y-20, 2, 2)
 	}
 
-	// linie y aktywnymi czujnikami (do wywalenia potem)
-	for i := 0; i < len(alerts); i++ {
-		for j := i + 1; j < len(alerts); j++ {
-			x1, y1 := project(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude)
-			x2, y2 := project(alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude)
+	// // linie miedzy aktywnymi czujnikami (do wywalenia potem)
+	// for i := 0; i < len(alerts); i++ {
+	// 	for j := i + 1; j < len(alerts); j++ {
+	// 		x1, y1 := project(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude)
+	// 		x2, y2 := project(alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude)
 
-			distance := Haversine(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude,
-				alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude)
+	// 		distance := Haversine(alerts[i].Sensor.Latitude, alerts[i].Sensor.Longitude,
+	// 			alerts[j].Sensor.Latitude, alerts[j].Sensor.Longitude)
 
-			dc.SetColor(color.RGBA{0, 0, 255, 150})
-			dc.DrawLine(x1, y1, x2, y2)
-			dc.Stroke()
+	// 		dc.SetColor(color.RGBA{0, 0, 255, 150})
+	// 		dc.DrawLine(x1, y1, x2, y2)
+	// 		dc.Stroke()
 
-			midX := (x1 + x2) / 2
-			midY := (y1 + y2) / 2
-			dc.SetColor(color.Black)
-			dc.DrawStringAnchored(fmt.Sprintf("%.0f m", distance), midX, midY-5, 0.5, 0.5)
-		}
-	}
+	// 		midX := (x1 + x2) / 2
+	// 		midY := (y1 + y2) / 2
+	// 		dc.SetColor(color.Black)
+	// 		dc.DrawStringAnchored(fmt.Sprintf("%.0f m", distance), midX, midY-5, 0.5, 0.5)
+	// 	}
+	// }
 
 	// aktywne alerty jako okręgi z promieniami SYZYF ZE SKALOWANIEM
 	for _, a := range alerts {

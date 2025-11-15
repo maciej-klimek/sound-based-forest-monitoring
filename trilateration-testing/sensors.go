@@ -12,7 +12,7 @@ type Sensor struct {
 }
 
 func LoadSensors() ([]Sensor, error) {
-	data, err := os.ReadFile("sensors.json")
+	data, err := os.ReadFile("mock-data/sensors.json")
 	if err != nil {
 		return nil, err
 	}

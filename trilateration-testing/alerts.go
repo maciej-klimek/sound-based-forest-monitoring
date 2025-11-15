@@ -21,7 +21,7 @@ type ActiveAlert struct {
 
 func LoadAlerts() ([]Alert, error) {
 	var alerts []Alert
-	files, err := filepath.Glob("alerts/*.json")
+	files, err := filepath.Glob("mock-data/alerts/*.json")
 	if err != nil {
 		return nil, err
 	}
