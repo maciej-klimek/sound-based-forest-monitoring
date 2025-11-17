@@ -40,7 +40,7 @@ func main() {
 	repo := repository.NewAlertsRepo(ddbCli, config.AppConfig.AWS.AlertsTable)
 
 	// tu narazie ustawiasz ttl dla kazdego alertu
-	mem := processor.NewMemory(5 * time.Minute)
+	mem := processor.NewMemory(2 * time.Minute)
 	h := handlers.NewHandler(repo, mem, logger)
 
 	consumer := queue.NewConsumer(sqsCli, config.AppConfig.AWS.SQSURL, h.HandleEnvelope, logger)
