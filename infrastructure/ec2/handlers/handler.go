@@ -4,20 +4,27 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
 	processor "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/processor"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/repository"
 )
 
 type Handler struct {
-	repo   *repository.AlertsRepo
+	repo   *repository.Repo
 	logger *log.Logger
 	mem    *processor.Memory
 }
 
-func NewHandler(repo *repository.AlertsRepo, mem *processor.Memory, logger *log.Logger) *Handler {
+var (
+	allSources []processor.SourceGroup
+	allMu      sync.Mutex
+)
+
+func NewHandler(repo *repository.Repo, mem *processor.Memory, logger *log.Logger) *Handler {
 	return &Handler{
 		repo:   repo,
 		mem:    mem,
@@ -26,7 +33,7 @@ func NewHandler(repo *repository.AlertsRepo, mem *processor.Memory, logger *log.
 }
 
 func (h *Handler) HandleEnvelope(ctx context.Context, env models.Envelope) error {
-	it, err := h.repo.GetByPK(ctx, env.DeviceID, env.TS, true)
+	it, err := h.repo.GeAlertByPK(ctx, env.DeviceID, env.TS, true)
 	if err != nil {
 		return err
 	}
@@ -54,9 +61,38 @@ func (h *Handler) HandleEnvelope(ctx context.Context, env models.Envelope) error
 	active := h.mem.GetAll()
 	sources := processor.FindPotentialSources(active, 3)
 
+	allMu.Lock()
+	allSources = append(allSources, sources...)
+	total := len(allSources)
+	allMu.Unlock()
+
 	// callujesz triangualcje dla active
 	fmt.Printf("active alerts: %d\n", len(active))
-	fmt.Printf("Potential sound sources%d\n", sources)
+	fmt.Printf("new potential sources: %d, total stored sources: %d\n", len(sources), total)
 
 	return nil
+}
+
+func (h *Handler) ListSensors(c *gin.Context) {
+	ctx := c.Request.Context()
+	sensors, err := h.repo.GetAllSensors(ctx)
+	if err != nil {
+		h.logger.Printf("GetAllSensors error: %v", err)
+		c.JSON(500, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(200, sensors)
+}
+
+func (h *Handler) ListAlerts(c *gin.Context) {
+	allMu.Lock()
+	resp := make([]processor.SourceGroup, len(allSources))
+	copy(resp, allSources)
+	allMu.Unlock()
+
+	c.JSON(200, gin.H{
+		"count":   len(resp),
+		"sources": resp,
+	})
 }

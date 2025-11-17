@@ -10,18 +10,19 @@ import (
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/models"
 )
 
-type AlertsRepo struct {
-	ddb   *dynamodb.Client
-	table string
+type Repo struct {
+	ddb          *dynamodb.Client
+	alertsTable  string
+	sensorsTable string
 }
 
-func NewAlertsRepo(ddb *dynamodb.Client, table string) *AlertsRepo {
-	return &AlertsRepo{ddb: ddb, table: table}
+func NewRepo(ddb *dynamodb.Client, alertsTable, sensorsTable string) *Repo {
+	return &Repo{ddb: ddb, alertsTable: alertsTable, sensorsTable: sensorsTable}
 }
 
-func (r *AlertsRepo) GetByPK(ctx context.Context, deviceID, ts string, consistent bool) (*models.Alert, error) {
+func (r *Repo) GeAlertByPK(ctx context.Context, deviceID, ts string, consistent bool) (*models.Alert, error) {
 	out, err := r.ddb.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: &r.table,
+		TableName: &r.alertsTable,
 		Key: map[string]types.AttributeValue{
 			"deviceId": &types.AttributeValueMemberS{Value: deviceID},
 			"ts":       &types.AttributeValueMemberS{Value: ts},
