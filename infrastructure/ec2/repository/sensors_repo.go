@@ -27,9 +27,6 @@ func (r *Repo) GetAllSensors(ctx context.Context) ([]models.Sensor, error) {
 		if v, ok := item["deviceId"].(*types.AttributeValueMemberS); ok {
 			s.DeviceID = v.Value
 		}
-		if v, ok := item["deviceSecret"].(*types.AttributeValueMemberS); ok {
-			s.DeviceSecret = v.Value
-		}
 		if v, ok := item["firstSeen"].(*types.AttributeValueMemberS); ok {
 			if t, err := time.Parse(time.RFC3339, v.Value); err == nil {
 				s.FirstSeen = t
