@@ -5,8 +5,8 @@ export default function AlertsPanel({ items: itemsProp, onSelect, onShow }) {
   const [loading, setLoading] = useState(!itemsProp);
   const [error, setError] = useState(null);
 
-  const [sortKey, setSortKey] = useState("score"); // "score" | "time"
-  const [dir, setDir] = useState("desc");          // "asc" | "desc"
+  const [sortKey, setSortKey] = useState("score"); 
+  const [dir, setDir] = useState("desc");          
 
   useEffect(() => {
     if (itemsProp) {

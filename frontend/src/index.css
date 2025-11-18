@@ -7,9 +7,9 @@
 
 .sensor-wrap {
   position: relative;
-  width: 60px;           /* hitbox ikony */
+  width: 60px;           
   height: 40px;
-  pointer-events: auto;  /* pozwól na kliknięcia -> popup zadziała */
+  pointer-events: auto;  
 }
 
 .sensor-dot {
@@ -18,8 +18,8 @@
   transform: translate(-50%, -50%);
   width: 10px; height: 10px;
   border-radius: 9999px;
-  background: #111827;           /* ciemny punkt w środku */
-  border: 2px solid #fff;         /* obwódka */
+  background: #111827;          
+  border: 2px solid #fff;         
   box-shadow: 0 1px 6px rgba(0,0,0,.25);
 }
 
@@ -27,7 +27,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: -18px;                     /* nad kropką */
+  top: -18px;                     
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -44,12 +44,12 @@
 .sensor-label--green  { border-color: #bbf7d0; color: #065f46; }
 
 
-/* karta / panel */
+
 .card {
   @apply bg-white rounded-[24px] shadow;
 }
 
-/* list item pastelowy */
+
 .pastel {
   @apply rounded-[14px] px-4 py-3 border;
 }
@@ -58,10 +58,8 @@
 .pastel-orange { @apply bg-orange-50 border-orange-200; }
 .pastel-neutral{ @apply bg-zinc-100  border-zinc-200; }
 
-/* ikony Leaflet */
 .leaflet-div-icon { background: transparent; border: 0; }
 
-/* niestandardowe znaczniki */
 .sensor-wrap { position: relative; width: 60px; height: 40px; pointer-events: auto; }
 .sensor-dot {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
@@ -77,7 +75,6 @@
 .sensor-label--amber  { border-color: #fde68a; color: #92400e; }
 .sensor-label--green  { border-color: #bbf7d0; color: #065f46; }
 
-/* trójkąt alertu (A1) */
 .alert-triangle {
   width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent;
   border-bottom: 22px solid #ef4444; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
@@ -90,3 +87,11 @@
 
 
 .sensor-wrap { cursor: pointer; }
+
+
+.leaflet-tooltip.sensor-badge {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}

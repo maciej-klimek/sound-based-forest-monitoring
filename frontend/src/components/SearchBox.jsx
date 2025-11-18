@@ -1,4 +1,3 @@
-// src/components/SearchBox.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const debounce = (fn, ms = 300) => {
@@ -15,7 +14,6 @@ export default function SearchBox({ sensors = [], onSelect }) {
   const [results, setResults] = useState([]);
   const abortRef = useRef(null);
 
-  // lokalne dopasowania po nazwie sensora (np. "CLW001")
   const sensorMatches = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return [];
@@ -67,7 +65,6 @@ export default function SearchBox({ sensors = [], onSelect }) {
           return;
         }
 
-        // 1) parse współrzędnych: "lat, lon"
         const m = t.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
         const coordResult = m
           ? [
@@ -81,14 +78,11 @@ export default function SearchBox({ sensors = [], onSelect }) {
             ]
           : [];
 
-        // 2) geokodowanie (miasta/adresy)
         const places = await doGeocode(t);
 
-        // wynik: najpierw sensory, potem coords, potem miejsca
         setResults([...sensorMatches, ...coordResult, ...places]);
         setOpen(true);
       }, 350),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sensorMatches]
   );
 

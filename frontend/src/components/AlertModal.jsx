@@ -1,4 +1,3 @@
-// src/components/AlertModal.jsx
 import { useEffect } from "react";
 
 export default function AlertModal({ open, alert, onClose, onFly }) {
