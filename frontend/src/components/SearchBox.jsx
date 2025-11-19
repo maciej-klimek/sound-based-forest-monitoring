@@ -1,3 +1,4 @@
+// src/components/SearchBox.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const debounce = (fn, ms = 300) => {
@@ -8,12 +9,13 @@ const debounce = (fn, ms = 300) => {
   };
 };
 
-export default function SearchBox({ sensors = [], onSelect }) {
+export default function SearchBox({ sensors = [], sources = [], onSelect }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState([]);
   const abortRef = useRef(null);
 
+  // czujniki
   const sensorMatches = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return [];
@@ -28,6 +30,22 @@ export default function SearchBox({ sensors = [], onSelect }) {
         lon: x.lon,
       }));
   }, [q, sensors]);
+
+  // alerty / źródła (A001 itp.)
+  const alertMatches = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) return [];
+    return sources
+      .filter((x) => x.id && x.id.toLowerCase().includes(s))
+      .slice(0, 5)
+      .map((x) => ({
+        type: "alert",
+        id: x.id,
+        label: `Alert ${x.id}`,
+        lat: x.lat,
+        lon: x.lon,
+      }));
+  }, [q, sources]);
 
   const doGeocode = async (query) => {
     if (abortRef.current) abortRef.current.abort();
@@ -65,6 +83,7 @@ export default function SearchBox({ sensors = [], onSelect }) {
           return;
         }
 
+        // współrzędne "50.06, 19.94"
         const m = t.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
         const coordResult = m
           ? [
@@ -80,10 +99,10 @@ export default function SearchBox({ sensors = [], onSelect }) {
 
         const places = await doGeocode(t);
 
-        setResults([...sensorMatches, ...coordResult, ...places]);
+        setResults([...alertMatches, ...sensorMatches, ...coordResult, ...places]);
         setOpen(true);
       }, 350),
-    [sensorMatches]
+    [sensorMatches, alertMatches]
   );
 
   useEffect(() => {
@@ -104,7 +123,7 @@ export default function SearchBox({ sensors = [], onSelect }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => q && setOpen(true)}
-          placeholder="Wyszukaj obszar, CLW…, lub 50.06, 19.94"
+          placeholder="Wyszukaj obszar, czujnik, alert A001 lub 50.06, 19.94"
           className="outline-none w-full text-sm"
         />
         {q && (
@@ -129,7 +148,15 @@ export default function SearchBox({ sensors = [], onSelect }) {
               onClick={() => pick(r)}
               className="w-full text-left px-4 py-2 hover:bg-zinc-100 flex gap-2"
             >
-              <span>{r.type === "sensor" ? "📟" : r.type === "coords" ? "🧭" : "📍"}</span>
+              <span>
+                {r.type === "sensor"
+                  ? "📟"
+                  : r.type === "coords"
+                  ? "🧭"
+                  : r.type === "alert"
+                  ? "⚠️"
+                  : "📍"}
+              </span>
               <span className="text-sm">
                 <span className="font-medium">{r.label}</span>
                 {(r.type === "place" || r.type === "coords") && (

@@ -21,9 +21,6 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
     events = [], // odczyty z czujników, ze ścieżkami audio
   } = alert;
 
-  const primarySample = events[0] || null;
-  const primaryAudio = primarySample?.audioUrl || primarySample?.s3Key || null;
-
   return (
     <div className="fixed inset-0 z-[1000]">
       <div
@@ -40,7 +37,8 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
               </div>
               <div className="mt-1 text-sm text-zinc-600 space-x-2">
                 <span>
-                  <span className="font-semibold">Status:</span> {status || "—"}
+                  <span className="font-semibold">Status:</span>{" "}
+                  {status || "—"}
                 </span>
                 {createdAt && (
                   <span>
@@ -96,37 +94,8 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
               )}
             </div>
 
-            {/* prawa kolumna: audio + lista odczytów */}
+            {/* prawa kolumna: tylko lista odczytów */}
             <div className="space-y-3">
-              <div>
-                <div className="text-sm text-zinc-500 mb-1.5">
-                  Próbka dźwięku (pierwszy odczyt)
-                </div>
-                {primaryAudio ? (
-                  <>
-                    <audio
-                      controls
-                      preload="none"
-                      src={primaryAudio}
-                      className="w-full"
-                    />
-                    <div className="mt-2">
-                      <a
-                        href={primaryAudio}
-                        download
-                        className="text-sm underline underline-offset-4 text-zinc-700 hover:text-black"
-                      >
-                        Pobierz plik audio
-                      </a>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-zinc-600">
-                    Brak dołączonej próbki audio (backend nie zwrócił URL).
-                  </div>
-                )}
-              </div>
-
               <div>
                 <div className="text-sm text-zinc-500 mb-1.5">
                   Odczyty z czujników
@@ -136,7 +105,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                     Brak szczegółowych odczytów dla tego alertu.
                   </div>
                 ) : (
-                  <ul className="space-y-1 max-h-48 overflow-auto text-xs">
+                  <ul className="space-y-1 max-h-64 overflow-auto text-xs">
                     {events.map((ev, idx) => {
                       const url = ev.audioUrl || ev.s3Key;
                       return (

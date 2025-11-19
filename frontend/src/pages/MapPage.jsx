@@ -67,6 +67,7 @@ export default function MapPage() {
             sources={activeSources}
             sensors={sensors}
             loading={sourcesLoading || sensorsLoading}
+            onAlertSelect={openSourceModal} // 🆕 po wyszukaniu alertu otwieramy modal
           />
         </section>
       </div>
