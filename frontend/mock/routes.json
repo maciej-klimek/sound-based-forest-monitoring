@@ -1,10 +1,6 @@
 {
   "routes": {
     "/api/sensors": "/sensors",
-    "/api/alerts": "/alerts",
-    "/api/triangulations": "/triangulations",
-    "/api/sensors/:id": "/sensors/:id",
-    "/api/alerts/:id": "/alerts/:id",
-    "/api/triangulations/:id": "/triangulations/:id"
+    "/api/alerts": "/alerts"
   }
 }

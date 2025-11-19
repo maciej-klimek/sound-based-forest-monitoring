@@ -1,3 +1,4 @@
+// src/components/AlertModal.jsx
 import { useEffect } from "react";
 
 export default function AlertModal({ open, alert, onClose, onFly }) {
@@ -10,22 +11,40 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
 
   if (!open || !alert) return null;
 
-  const { id, lat, lon, score, message, startedAt, endedAt, audioUrl, sourceId } =
-    alert;
+  const {
+    id,
+    lat,
+    lon,
+    status,
+    createdAt,
+    devices = [],
+    events = [], // odczyty z czujników, ze ścieżkami audio
+  } = alert;
+
+  const primarySample = events[0] || null;
+  const primaryAudio = primarySample?.audioUrl || primarySample?.s3Key || null;
 
   return (
     <div className="fixed inset-0 z-[1000]">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="absolute inset-0 grid place-items-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl">
+          {/* nagłówek */}
           <div className="flex items-start justify-between p-5 border-b">
             <div>
-              <div className="text-lg font-extrabold">Szczegóły alertu</div>
-              <div className="mt-1 text-sm text-zinc-600">
-                <span className="font-semibold">ID:</span> {id}
-                {sourceId && (
-                  <span className="ml-3">
-                    <span className="font-semibold">Czujnik:</span> {sourceId}
+              <div className="text-lg font-extrabold">
+                Szczegóły alertu {id}
+              </div>
+              <div className="mt-1 text-sm text-zinc-600 space-x-2">
+                <span>
+                  <span className="font-semibold">Status:</span> {status || "—"}
+                </span>
+                {createdAt && (
+                  <span>
+                    <span className="font-semibold">Czas:</span> {createdAt}
                   </span>
                 )}
               </div>
@@ -39,35 +58,35 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
             </button>
           </div>
 
+          {/* treść */}
           <div className="p-5 grid md:grid-cols-2 gap-6">
-            <div className="space-y-2 text-sm">
-              {message && (
-                <div>
-                  <div className="text-zinc-500">Opis</div>
-                  <div className="font-medium">{message}</div>
-                </div>
-              )}
+            {/* lewa kolumna: meta alertu */}
+            <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-x-3">
                 <div>
                   <div className="text-zinc-500">Lat</div>
-                  <div className="font-medium">{Number(lat).toFixed(5)}</div>
+                  <div className="font-medium">
+                    {lat != null ? Number(lat).toFixed(5) : "—"}
+                  </div>
                 </div>
                 <div>
                   <div className="text-zinc-500">Lon</div>
-                  <div className="font-medium">{Number(lon).toFixed(5)}</div>
-                </div>
-                <div>
-                  <div className="text-zinc-500">Score</div>
-                  <div className="font-medium">{score ?? "—"}</div>
-                </div>
-                <div>
-                  <div className="text-zinc-500">Czas</div>
                   <div className="font-medium">
-                    {startedAt || "—"}{endedAt ? ` → ${endedAt}` : ""}
+                    {lon != null ? Number(lon).toFixed(5) : "—"}
                   </div>
                 </div>
               </div>
-              {onFly && lat && lon && (
+
+              {devices.length > 0 && (
+                <div>
+                  <div className="text-zinc-500 mb-0.5">Czujniki</div>
+                  <div className="font-mono text-xs break-words">
+                    {devices.join(", ")}
+                  </div>
+                </div>
+              )}
+
+              {onFly && lat != null && lon != null && (
                 <button
                   onClick={() => onFly([lat, lon])}
                   className="mt-2 px-3 py-1.5 rounded-xl border bg-white hover:bg-zinc-50 text-sm"
@@ -77,29 +96,90 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
               )}
             </div>
 
-            <div>
-              <div className="text-sm text-zinc-500 mb-1.5">Próbka dźwięku</div>
-              {audioUrl ? (
-                <>
-                  <audio controls preload="none" src={audioUrl} className="w-full" />
-                  <div className="mt-2">
-                    <a
-                      href={audioUrl}
-                      download
-                      className="text-sm underline underline-offset-4 text-zinc-700 hover:text-black"
-                    >
-                      Pobierz plik audio
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <div className="text-sm text-zinc-600">
-                  Brak dołączonej próbki audio do tego alertu.
+            {/* prawa kolumna: audio + lista odczytów */}
+            <div className="space-y-3">
+              <div>
+                <div className="text-sm text-zinc-500 mb-1.5">
+                  Próbka dźwięku (pierwszy odczyt)
                 </div>
-              )}
+                {primaryAudio ? (
+                  <>
+                    <audio
+                      controls
+                      preload="none"
+                      src={primaryAudio}
+                      className="w-full"
+                    />
+                    <div className="mt-2">
+                      <a
+                        href={primaryAudio}
+                        download
+                        className="text-sm underline underline-offset-4 text-zinc-700 hover:text-black"
+                      >
+                        Pobierz plik audio
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-sm text-zinc-600">
+                    Brak dołączonej próbki audio (backend nie zwrócił URL).
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="text-sm text-zinc-500 mb-1.5">
+                  Odczyty z czujników
+                </div>
+                {events.length === 0 ? (
+                  <div className="text-xs text-zinc-500">
+                    Brak szczegółowych odczytów dla tego alertu.
+                  </div>
+                ) : (
+                  <ul className="space-y-1 max-h-48 overflow-auto text-xs">
+                    {events.map((ev, idx) => {
+                      const url = ev.audioUrl || ev.s3Key;
+                      return (
+                        <li
+                          key={ev.deviceId + ev.ts + idx}
+                          className="flex items-center justify-between gap-2 border rounded-lg px-2 py-1"
+                        >
+                          <div className="space-y-0.5">
+                            <div className="font-mono">
+                              {ev.deviceId || "unknown"}
+                            </div>
+                            <div className="text-zinc-500">
+                              {ev.ts || ev.createdAt || "brak czasu"}
+                            </div>
+                            {ev.status && (
+                              <div>
+                                <span className="text-zinc-500">
+                                  status:
+                                </span>{" "}
+                                {ev.status}
+                              </div>
+                            )}
+                          </div>
+                          {url && (
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] underline underline-offset-2 text-blue-600"
+                            >
+                              audio
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* stopka */}
           <div className="p-5 border-t flex justify-end">
             <button
               onClick={onClose}
