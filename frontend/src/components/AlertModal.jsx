@@ -94,7 +94,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
               )}
             </div>
 
-            {/* prawa kolumna: tylko lista odczytów */}
+            {/* prawa kolumna: lista odczytów */}
             <div className="space-y-3">
               <div>
                 <div className="text-sm text-zinc-500 mb-1.5">
@@ -111,7 +111,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                       return (
                         <li
                           key={ev.deviceId + ev.ts + idx}
-                          className="flex items-center justify-between gap-2 border rounded-lg px-2 py-1"
+                          className="flex items-center justify-between gap-2 border rounded-lg px-2 py-1 bg-white"
                         >
                           <div className="space-y-0.5">
                             <div className="font-mono">
@@ -146,16 +146,6 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* stopka */}
-          <div className="p-5 border-t flex justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl border bg-white hover:bg-zinc-50"
-            >
-              Zamknij
-            </button>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
   Marker,
   Popup,
   Circle,
+  CircleMarker,   // 🆕 mały punkt w środku okręgu
   ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
@@ -52,7 +53,7 @@ export default function MapView({
   loading = false,
 }) {
   const markersRef = useRef({});
-  const sourceRefs = useRef({}); // 🆕 referencje do kółek (alertów)
+  const sourceRefs = useRef({}); // referencje do kółek (alertów)
   const [base, setBase] = useState("topo");
   const [showSources, setShowSources] = useState(true);
   const [showSensors, setShowSensors] = useState(true);
@@ -71,15 +72,12 @@ export default function MapView({
         sensors={sensors}
         sources={sources}
         onSelect={(pos, item) => {
-          // przelot do wskazanego miejsca
           mapRef?.current?.flyTo(pos, item?.type === "sensor" ? 16 : 13);
 
-          // po wyszukaniu czujnika – otwórz jego popup
           if (item?.type === "sensor" && item.id) {
             setTimeout(() => markersRef.current[item.id]?.openPopup(), 250);
           }
 
-          // po wyszukaniu alertu – otwórz popup źródła (koło)
           if (item?.type === "alert" && item.id) {
             setTimeout(() => sourceRefs.current[item.id]?.openPopup(), 250);
           }
@@ -111,6 +109,9 @@ export default function MapView({
       {/* nakładki */}
       <div className="absolute z-[500] right-6 top-[88px]">
         <div className="bg-white/95 backdrop-blur border rounded-[12px] shadow px-2 py-1.5 text-[12px] space-y-1">
+          <div className="text-xs text-zinc-500">
+            czujniki: {summary.sensors}, źródła: {summary.sources}
+          </div>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -166,7 +167,7 @@ export default function MapView({
                 fillOpacity: 0.25,
               }}
               ref={(el) => {
-                if (el) sourceRefs.current[src.id] = el; // 🆕 zapisz ref
+                if (el) sourceRefs.current[src.id] = el;
               }}
             >
               <Popup autoPan keepInView>
@@ -188,6 +189,22 @@ export default function MapView({
                 </div>
               </Popup>
             </Circle>
+          ))}
+
+        {/* 🆕 PUNKT TRIANGULACJI W ŚRODKU OKRĘGU */}
+        {showSources &&
+          sources.map((src) => (
+            <CircleMarker
+              key={src.id + "-center"}
+              center={[src.lat, src.lon]}
+              radius={5}
+              pathOptions={{
+                color: "#b91c1c",     // ciemniejsza czerwień obwódki
+                weight: 2,
+                fillColor: "#ffffff", // białe wypełnienie
+                fillOpacity: 1,
+              }}
+            />
           ))}
 
         {/* CZUJNIKI */}

@@ -2,11 +2,56 @@
 import { useMemo, useState } from "react";
 
 export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) {
-  const [q, setQ] = useState("");
+  const [qMain, setQMain] = useState("");   // ID / status / device
+  const [qLat, setQLat] = useState("");     // filtr po lat
+  const [qLon, setQLon] = useState("");     // filtr po lon
+
   const [sortField, setSortField] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+
+  // dopasowanie lat z prostymi operatorami
+  const matchesLat = (alertLat) => {
+    const v = qLat.trim();
+    if (!v) return true;
+    if (alertLat == null) return false;
+
+    const m = v.match(/^([<>]=?)?\s*(-?\d+(?:\.\d+)?)/);
+    if (m) {
+      const op = m[1];
+      const num = parseFloat(m[2]);
+      if (isNaN(num)) return true;
+      if (!op) return alertLat.toFixed(4).includes(m[2]);
+      if (op === ">") return alertLat > num;
+      if (op === "<") return alertLat < num;
+      if (op === ">=") return alertLat >= num;
+      if (op === "<=") return alertLat <= num;
+      return true;
+    }
+
+    return alertLat.toFixed(4).includes(v);
+  };
+
+  // dopasowanie lon z prostymi operatorami
+  const matchesLon = (alertLon) => {
+    const v = qLon.trim();
+    if (!v) return true;
+    if (alertLon == null) return false;
+
+    const m = v.match(/^([<>]=?)?\s*(-?\d+(?:\.\d+)?)/);
+    if (m) {
+      const op = m[1];
+      const num = parseFloat(m[2]);
+      if (isNaN(num)) return true;
+      if (!op) return alertLon.toFixed(4).includes(m[2]);
+      if (op === ">") return alertLon > num;
+      if (op === "<") return alertLon < num;
+      if (op === ">=") return alertLon >= num;
+      if (op === "<=") return alertLon <= num;
+      return true;
+    }
+
+    return alertLon.toFixed(4).includes(v);
+  };
 
   const enriched = useMemo(() => {
     const withCoords = alerts.map((a) => {
@@ -16,18 +61,23 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
         lat: src?.lat ?? null,
         lon: src?.lon ?? null,
         devices: a.devices,
-        // przyda się do modala
         _sourceRawAlerts: src?.rawAlerts || [],
       };
     });
 
     const filtered = withCoords.filter((a) => {
-      const term = q.trim().toLowerCase();
-      if (!term) return true;
-      return (
-        a.id.toLowerCase().includes(term) ||
-        (a.status || "").toLowerCase().includes(term)
-      );
+      const main = qMain.trim().toLowerCase();
+
+      const okMain =
+        !main ||
+        a.id.toLowerCase().includes(main) ||
+        (a.status || "").toLowerCase().includes(main) ||
+        a.devices.some((d) => d.toLowerCase().includes(main));
+
+      const okLat = matchesLat(a.lat);
+      const okLon = matchesLon(a.lon);
+
+      return okMain && okLat && okLon;
     });
 
     const sorted = [...filtered].sort((a, b) => {
@@ -36,8 +86,8 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
         va = a.id;
         vb = b.id;
       } else if (sortField === "status") {
-        va = a.status;
-        vb = b.status;
+        va = a.status || "";
+        vb = b.status || "";
       } else {
         va = a.createdAt || "";
         vb = b.createdAt || "";
@@ -48,73 +98,87 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
     });
 
     return sorted;
-  }, [alerts, sourcesIndex, q, sortField, sortDir]);
+  }, [alerts, sourcesIndex, qMain, qLat, qLon, sortField, sortDir]);
 
   const total = enriched.length;
-  const pages = Math.max(1, Math.ceil(total / limit));
-  const start = (page - 1) * limit;
-  const current = enriched.slice(start, start + limit);
+  const current = enriched;
 
   const rowClass = (status) =>
-    status === "new"
-      ? "pastel pastel-rose"
-      : "pastel pastel-neutral";
+    status === "new" ? "pastel pastel-rose" : "pastel pastel-neutral";
 
   return (
     <div className="card p-6">
       <h2 className="text-3xl font-black mb-4">Historia Alertów</h2>
 
-      <div className="mb-4 flex flex-wrap gap-2 items-center">
+      {/* FILTRY + SORT (jedna linia na desktopie) */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* search: ID / status / device */}
         <input
-          value={q}
-          onChange={(e) => {
-            setPage(1);
-            setQ(e.target.value);
-          }}
-          placeholder="Szukaj po ID / statusie…"
-          className="border rounded-lg px-3 py-2 text-sm"
+          value={qMain}
+          onChange={(e) => setQMain(e.target.value)}
+          placeholder="ID / status / device…"
+          className="border rounded-full px-4 py-2 text-sm w-[240px]"
         />
-        <select
-          value={sortField}
-          onChange={(e) => {
-            setPage(1);
-            setSortField(e.target.value);
-          }}
-          className="border rounded-lg px-2 py-2 text-sm"
-        >
-          <option value="createdAt">czas</option>
-          <option value="id">ID</option>
-          <option value="status">status</option>
-        </select>
-        <select
-          value={sortDir}
-          onChange={(e) => {
-            setPage(1);
-            setSortDir(e.target.value);
-          }}
-          className="border rounded-lg px-2 py-2 text-sm"
-        >
-          <option value="desc">malejąco</option>
-          <option value="asc">rosnąco</option>
-        </select>
-        <select
-          value={limit}
-          onChange={(e) => {
-            setPage(1);
-            setLimit(Number(e.target.value));
-          }}
-          className="border rounded-lg px-2 py-2 text-sm"
-        >
-          <option value={10}>10 / stronę</option>
-          <option value={20}>20 / stronę</option>
-          <option value={50}>50 / stronę</option>
-        </select>
+
+        {/* Lat / Lon */}
+        <div className="flex items-center gap-2">
+          <input
+            value={qLat}
+            onChange={(e) => setQLat(e.target.value)}
+            placeholder="Lat"
+            className="border rounded-full px-3 py-2 text-sm w-[80px]"
+          />
+          <input
+            value={qLon}
+            onChange={(e) => setQLon(e.target.value)}
+            placeholder="Lon"
+            className="border rounded-full px-3 py-2 text-sm w-[80px]"
+          />
+        </div>
+
+        {/* sort pigułki */}
+        <div className="flex items-center gap-2">
+          {[
+            { key: "createdAt", label: "Czas" },
+            { key: "id", label: "ID" },
+            { key: "status", label: "Status" },
+          ].map((btn) => {
+            const active = sortField === btn.key;
+            const arrow = sortDir === "asc" ? "▲" : "▼";
+
+            return (
+              <button
+                key={btn.key}
+                type="button"
+                onClick={() => {
+                  if (active) {
+                    setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                  } else {
+                    setSortField(btn.key);
+                    setSortDir("desc");
+                  }
+                }}
+                className={
+                  "flex items-center justify-center gap-1 px-3 py-2 rounded-full border text-xs font-semibold min-w-[90px] transition " +
+                  (active
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-black border-zinc-400 hover:bg-zinc-100")
+                }
+              >
+                <span>{btn.label}</span>
+                <span className="text-[10px]">{arrow}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="text-xs text-zinc-500 ml-auto">
-          {current.length} / {total}
+          {total} alertów
         </div>
       </div>
 
-      <div className="space-y-4">
+      {/* LISTA – scrollowana */}
+      <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
         {current.map((it) => (
           <button
             key={it.id + it.createdAt}
@@ -166,26 +230,6 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
         {current.length === 0 && (
           <div className="text-sm text-zinc-500">brak wyników</div>
         )}
-      </div>
-
-      <div className="mt-4 flex items-center gap-2">
-        <button
-          disabled={page <= 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          className="px-3 py-1.5 border rounded-lg disabled:opacity-50"
-        >
-          ← poprzednia
-        </button>
-        <div className="text-sm">
-          strona {page} / {pages}
-        </div>
-        <button
-          disabled={page >= pages}
-          onClick={() => setPage((p) => Math.min(pages, p + 1))}
-          className="px-3 py-1.5 border rounded-lg disabled:opacity-50"
-        >
-          następna →
-        </button>
       </div>
     </div>
   );

@@ -1,6 +1,38 @@
 // src/components/AlertsPanel.jsx
+import { useMemo, useState } from "react";
+
 export default function AlertsPanel({ items = [], onSelect, onShow }) {
   const toneClass = "pastel pastel-rose"; // tylko new
+
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortDir, setSortDir] = useState("desc");
+
+  const sortedItems = useMemo(() => {
+    const arr = [...items];
+
+    arr.sort((a, b) => {
+      let va, vb;
+      if (sortField === "id") {
+        va = a.id;
+        vb = b.id;
+      } else {
+        // domyślnie czas (createdAt)
+        va = a.createdAt || "";
+        vb = b.createdAt || "";
+      }
+
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return arr;
+  }, [items, sortField, sortDir]);
+
+  const sortButtons = [
+    { key: "createdAt", label: "Czas" },
+    { key: "id", label: "ID" },
+  ];
 
   return (
     <div className="card h-[700px] rounded-[24px] overflow-hidden p-0 flex flex-col">
@@ -13,14 +45,46 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
           Pokazuje tylko alerty ze statusem{" "}
           <span className="font-semibold">new</span>
         </p>
+
+        {/* sortowanie Czas / ID */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {sortButtons.map((btn) => {
+            const active = sortField === btn.key;
+            const arrow = sortDir === "asc" ? "▲" : "▼";
+
+            return (
+              <button
+                key={btn.key}
+                type="button"
+                onClick={() => {
+                  if (active) {
+                    setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+                  } else {
+                    setSortField(btn.key);
+                    setSortDir("desc");
+                  }
+                }}
+                className={
+                  "flex items-center justify-center gap-1 px-3 py-2 rounded-full border text-xs font-semibold min-w-[90px] transition " +
+                  (active
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-black border-zinc-400 hover:bg-zinc-100")
+                }
+              >
+                <span>{btn.label}</span>
+                <span className="text-[10px]">{arrow}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="px-5 pb-5 space-y-3 overflow-y-auto flex-1">
-        {items.length === 0 && (
+        {sortedItems.length === 0 && (
           <div className="text-sm text-zinc-500">brak aktywnych alertów</div>
         )}
 
-        {items.map((src) => (
+        {sortedItems.map((src) => (
           <div key={src.id} className={toneClass}>
             <button
               type="button"
