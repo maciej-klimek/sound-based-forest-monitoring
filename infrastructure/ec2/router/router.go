@@ -13,6 +13,11 @@ func SetupRouter(handler *handlers.Handler) *gin.Engine {
 		sensors.GET("", handler.ListSensors)
 	}
 
+	sources := r.Group("/sources")
+	{
+		sources.GET("", handler.ListSources)
+	}
+
 	alerts := r.Group("/alerts")
 	{
 		alerts.GET("", handler.ListAlerts)

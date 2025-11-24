@@ -17,6 +17,7 @@ type AWSConfig struct {
 	SQSURL       string `yaml:"sqs_url"`
 	DevicesTable string `yaml:"devices_table"`
 	AlertsTable  string `yaml:"alerts_table"`
+	BucketName   string `yaml:"bucket_name"`
 }
 
 //go:embed configuration.yml

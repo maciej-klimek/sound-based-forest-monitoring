@@ -3,3 +3,4 @@ aws:
   sqs_url:
   devices_table:
   alerts_table:
+  bucket_name:
