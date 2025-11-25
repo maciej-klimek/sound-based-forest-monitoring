@@ -17,7 +17,7 @@ export function useAlerts(intervalMs = 10000) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`${API}/api/alerts`);
+        const res = await fetch(`${API}/alerts`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 

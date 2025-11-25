@@ -17,7 +17,7 @@ export function useSources(intervalMs = 10000) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`${API}/api/sources`);
+        const res = await fetch(`${API}/sources`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
