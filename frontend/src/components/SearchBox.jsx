@@ -15,7 +15,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
   const [results, setResults] = useState([]);
   const abortRef = useRef(null);
 
-  // czujniki
+  // sensors
   const sensorMatches = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return [];
@@ -31,7 +31,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
       }));
   }, [q, sensors]);
 
-  // alerty / źródła (A001 itp.)
+  // alerts / sources (A001, etc.)
   const alertMatches = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return [];
@@ -83,7 +83,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
           return;
         }
 
-        // współrzędne "50.06, 19.94"
+        // coordinates "50.06, 19.94"
         const m = t.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
         const coordResult = m
           ? [
@@ -123,7 +123,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => q && setOpen(true)}
-          placeholder="Wyszukaj obszar, czujnik, alert A001 lub 50.06, 19.94"
+          placeholder="Search area, sensor, alert A001, or 50.06, 19.94"
           className="outline-none w-full text-sm"
         />
         {q && (

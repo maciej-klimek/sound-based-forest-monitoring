@@ -9,21 +9,21 @@ import { useSources } from "../hooks/useSources";
 export default function HistoryPage() {
   const [selectedAlert, setSelectedAlert] = useState(null);
 
-  // pełna historia alertów (GET /alerts)
+  // full history of alerts (GET /alerts)
   const {
     alerts,
     loading: alertsLoading,
     error: alertsError,
   } = useAlerts(30_000);
 
-  // źródła (trilateracje) – GET /sources
+  // sources (trilateration) – GET /sources
   const {
     sources,
     loading: sourcesLoading,
     error: sourcesError,
   } = useSources(30_000);
 
-  // indeks id -> source (do dociągnięcia lat/lon w historii)
+  // index id -> source (for fetching lat/lon in history)
   const sourcesIndex = useMemo(() => {
     const idx = {};
     for (const s of sources) {
@@ -32,13 +32,13 @@ export default function HistoryPage() {
     return idx;
   }, [sources]);
 
-  // aktywne źródła (status === "new") – panel po lewej
+  // active sources (status === "new") – panel on the left
   const activeSources = useMemo(
     () => sources.filter((s) => s.status === "new"),
     [sources]
   );
 
-  // otwórz modal z panelu „Aktywne Alerty”
+  // open modal from the "Active Alerts" panel
   const openFromSource = (src) => {
     setSelectedAlert({
       id: src.id,
@@ -51,7 +51,7 @@ export default function HistoryPage() {
     });
   };
 
-  // otwórz modal z wiersza historii (tam już mamy gotowy obiekt)
+  // open modal from the history row (we already have the object)
   const openFromHistory = (alertLike) => {
     setSelectedAlert(alertLike);
   };
@@ -59,28 +59,28 @@ export default function HistoryPage() {
   return (
     <>
       <div className="grid grid-cols-1 lg:[grid-template-columns:380px_1fr] gap-8">
-        {/* LEWA KOLUMNA – aktywne alerty (sources status=new) */}
+        {/* LEFT COLUMN – active alerts (sources status=new) */}
         <aside className="lg:sticky lg:top-4">
           <div className="max-w-[380px]">
             <AlertsPanel
               items={activeSources}
               onShow={openFromSource}
-              // na historii nie potrzebujemy flyTo, więc nie podajemy onSelect
+              // no need for flyTo on history, so no onSelect provided
             />
 
             {(sourcesError || alertsError) && (
               <div className="mt-2 text-xs text-rose-600">
-                {sourcesError && <>Błąd źródeł: {sourcesError}<br /></>}
-                {alertsError && <>Błąd alertów: {alertsError}</>}
+                {sourcesError && <>Sources Error: {sourcesError}<br /></>}
+                {alertsError && <>Alerts Error: {alertsError}</>}
               </div>
             )}
           </div>
         </aside>
 
-        {/* PRAWA KOLUMNA – historia wszystkich alertów */}
+        {/* RIGHT COLUMN – full alert history */}
         <section>
           {alertsLoading && (
-            <div className="text-sm text-zinc-500">ładowanie historii…</div>
+            <div className="text-sm text-zinc-500">Loading history...</div>
           )}
 
           {!alertsLoading && !alertsError && (
@@ -93,7 +93,7 @@ export default function HistoryPage() {
         </section>
       </div>
 
-      {/* Wspólny modal dla obu paneli */}
+      {/* Common modal for both panels */}
       <AlertModal
         open={!!selectedAlert}
         alert={selectedAlert}

@@ -3,13 +3,13 @@ import { useMemo, useState } from "react";
 
 export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) {
   const [qMain, setQMain] = useState("");   // ID / status / device
-  const [qLat, setQLat] = useState("");     // filtr po lat
-  const [qLon, setQLon] = useState("");     // filtr po lon
+  const [qLat, setQLat] = useState("");     // filter by lat
+  const [qLon, setQLon] = useState("");     // filter by lon
 
   const [sortField, setSortField] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
 
-  // dopasowanie lat z prostymi operatorami
+  // matching lat with simple operators
   const matchesLat = (alertLat) => {
     const v = qLat.trim();
     if (!v) return true;
@@ -31,7 +31,7 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
     return alertLat.toFixed(4).includes(v);
   };
 
-  // dopasowanie lon z prostymi operatorami
+  // matching lon with simple operators
   const matchesLon = (alertLon) => {
     const v = qLon.trim();
     if (!v) return true;
@@ -108,9 +108,9 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
 
   return (
     <div className="card p-6">
-      <h2 className="text-3xl font-black mb-4">Historia Alertów</h2>
+      <h2 className="text-3xl font-black mb-4">Alert History</h2>
 
-      {/* FILTRY + SORT (jedna linia na desktopie) */}
+      {/* FILTERS + SORTING (one line on desktop) */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         {/* search: ID / status / device */}
         <input
@@ -136,10 +136,10 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
           />
         </div>
 
-        {/* sort pigułki */}
+        {/* sort pills */}
         <div className="flex items-center gap-2">
           {[
-            { key: "createdAt", label: "Czas" },
+            { key: "createdAt", label: "Time" },
             { key: "id", label: "ID" },
             { key: "status", label: "Status" },
           ].map((btn) => {
@@ -173,11 +173,11 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
         </div>
 
         <div className="text-xs text-zinc-500 ml-auto">
-          {total} alertów
+          {total} alerts
         </div>
       </div>
 
-      {/* LISTA – scrollowana */}
+      {/* LIST – scrollable */}
       <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
         {current.map((it) => (
           <button
@@ -202,7 +202,7 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
               </div>
 
               <div className="text-sm">
-                <span className="text-zinc-500 mr-1">Czas:</span>{" "}
+                <span className="text-zinc-500 mr-1">Time:</span>{" "}
                 {it.createdAt || "—"}
               </div>
 
@@ -218,7 +218,7 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
               </div>
 
               <div className="text-sm md:text-right">
-                <span className="text-zinc-500">Czujniki:</span>{" "}
+                <span className="text-zinc-500">Devices:</span>{" "}
                 <span className="font-mono text-xs">
                   {it.devices?.join(", ") || "—"}
                 </span>
@@ -228,7 +228,7 @@ export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) 
         ))}
 
         {current.length === 0 && (
-          <div className="text-sm text-zinc-500">brak wyników</div>
+          <div className="text-sm text-zinc-500">no results</div>
         )}
       </div>
     </div>

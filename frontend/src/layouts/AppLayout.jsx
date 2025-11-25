@@ -10,20 +10,20 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-zinc-200/60">
       <header className="px-8 py-5">
-        {/* tylko prawy przełącznik, bez napisu LAS */}
+        {/* only right toggle, without 'LAS' text */}
         <div className="max-w-7xl mx-auto flex items-center justify-end">
           <nav className="flex gap-3">
             <NavLink
               to="/mapa"
               className={({ isActive }) => `${pill} ${isActive ? active : inactive}`}
             >
-              🗺️ Mapa
+              🗺️ Map
             </NavLink>
             <NavLink
               to="/historia"
               className={({ isActive }) => `${pill} ${isActive ? active : inactive}`}
             >
-              ⏱️ Historia
+              ⏱️ History
             </NavLink>
           </nav>
         </div>

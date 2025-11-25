@@ -18,7 +18,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
     status,
     createdAt,
     devices = [],
-    events = [], // odczyty z czujników, ze ścieżkami audio
+    events = [], // sensor readings with audio paths
   } = alert;
 
   return (
@@ -29,11 +29,11 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
       />
       <div className="absolute inset-0 grid place-items-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl">
-          {/* nagłówek */}
+          {/* header */}
           <div className="flex items-start justify-between p-5 border-b">
             <div>
               <div className="text-lg font-extrabold">
-                Szczegóły alertu {id}
+                Alert details {id}
               </div>
               <div className="mt-1 text-sm text-zinc-600 space-x-2">
                 <span>
@@ -42,7 +42,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                 </span>
                 {createdAt && (
                   <span>
-                    <span className="font-semibold">Czas:</span> {createdAt}
+                    <span className="font-semibold">Time:</span> {createdAt}
                   </span>
                 )}
               </div>
@@ -50,15 +50,15 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
             <button
               onClick={onClose}
               className="bg-zinc-100 hover:bg-zinc-200 border rounded-full w-9 h-9 grid place-items-center text-lg"
-              aria-label="Zamknij"
+              aria-label="Close"
             >
               ×
             </button>
           </div>
 
-          {/* treść */}
+          {/* content */}
           <div className="p-5 grid md:grid-cols-2 gap-6">
-            {/* lewa kolumna: meta alertu */}
+            {/* left column: alert meta */}
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-x-3">
                 <div>
@@ -77,7 +77,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
 
               {devices.length > 0 && (
                 <div>
-                  <div className="text-zinc-500 mb-0.5">Czujniki</div>
+                  <div className="text-zinc-500 mb-0.5">Devices</div>
                   <div className="font-mono text-xs break-words">
                     {devices.join(", ")}
                   </div>
@@ -89,20 +89,20 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                   onClick={() => onFly([lat, lon])}
                   className="mt-2 px-3 py-1.5 rounded-xl border bg-white hover:bg-zinc-50 text-sm"
                 >
-                  Pokaż na mapie
+                  Show on map
                 </button>
               )}
             </div>
 
-            {/* prawa kolumna: lista odczytów */}
+            {/* right column: sensor readings */}
             <div className="space-y-3">
               <div>
                 <div className="text-sm text-zinc-500 mb-1.5">
-                  Odczyty z czujników
+                  Sensor readings
                 </div>
                 {events.length === 0 ? (
                   <div className="text-xs text-zinc-500">
-                    Brak szczegółowych odczytów dla tego alertu.
+                    No detailed sensor data available for this alert.
                   </div>
                 ) : (
                   <ul className="space-y-1 max-h-64 overflow-auto text-xs">
@@ -118,7 +118,7 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                               {ev.deviceId || "unknown"}
                             </div>
                             <div className="text-zinc-500">
-                              {ev.ts || ev.createdAt || "brak czasu"}
+                              {ev.ts || ev.createdAt || "no timestamp"}
                             </div>
                             {ev.status && (
                               <div>

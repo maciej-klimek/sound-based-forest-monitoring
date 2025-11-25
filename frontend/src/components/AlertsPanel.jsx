@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 
 export default function AlertsPanel({ items = [], onSelect, onShow }) {
-  const toneClass = "pastel pastel-rose"; // tylko new
+  const toneClass = "pastel pastel-rose"; // only new
 
   const [sortField, setSortField] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
@@ -16,7 +16,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
         va = a.id;
         vb = b.id;
       } else {
-        // domyślnie czas (createdAt)
+        // default sorting by time (createdAt)
         va = a.createdAt || "";
         vb = b.createdAt || "";
       }
@@ -30,7 +30,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
   }, [items, sortField, sortDir]);
 
   const sortButtons = [
-    { key: "createdAt", label: "Czas" },
+    { key: "createdAt", label: "Time" },
     { key: "id", label: "ID" },
   ];
 
@@ -38,15 +38,15 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
     <div className="card h-[700px] rounded-[24px] overflow-hidden p-0 flex flex-col">
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur px-5 pt-5 pb-3">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-2xl font-black">Aktywne Alerty</h2>
+          <h2 className="text-2xl font-black">Active Alerts</h2>
           <span className="text-xs text-zinc-500">{items.length}</span>
         </div>
         <p className="text-xs text-zinc-500">
-          Pokazuje tylko alerty ze statusem{" "}
-          <span className="font-semibold">new</span>
+          Shows only alerts with{" "}
+          <span className="font-semibold">new</span> status
         </p>
 
-        {/* sortowanie Czas / ID */}
+        {/* sorting Time / ID */}
         <div className="mt-3 flex flex-wrap gap-2">
           {sortButtons.map((btn) => {
             const active = sortField === btn.key;
@@ -81,7 +81,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
 
       <div className="px-5 pb-5 space-y-3 overflow-y-auto flex-1">
         {sortedItems.length === 0 && (
-          <div className="text-sm text-zinc-500">brak aktywnych alertów</div>
+          <div className="text-sm text-zinc-500">no active alerts</div>
         )}
 
         {sortedItems.map((src) => (
@@ -99,7 +99,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
                 </div>
                 {src.devices?.length > 0 && (
                   <div>
-                    <span className="text-zinc-500">Czujniki:</span>{" "}
+                    <span className="text-zinc-500">Sensors:</span>{" "}
                     <span className="font-mono text-xs">
                       {src.devices.join(", ")}
                     </span>
@@ -120,7 +120,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
                 onClick={() => onSelect([src.lat, src.lon])}
                 className="mt-2 text-[12px] underline underline-offset-4"
               >
-                Pokaż na mapie
+                Show on map
               </button>
             )}
           </div>

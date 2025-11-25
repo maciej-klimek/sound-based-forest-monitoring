@@ -54,8 +54,8 @@ export default function MapPage() {
 
             {(sourcesError || sensorsError) && (
               <div className="mt-2 text-xs text-rose-600">
-                {sourcesError && <>Błąd źródeł: {sourcesError}<br /></>}
-                {sensorsError && <>Błąd czujników: {sensorsError}</>}
+                {sourcesError && <>Sources Error: {sourcesError}<br /></>}
+                {sensorsError && <>Sensors Error: {sensorsError}</>}
               </div>
             )}
           </div>
@@ -67,7 +67,7 @@ export default function MapPage() {
             sources={activeSources}
             sensors={sensors}
             loading={sourcesLoading || sensorsLoading}
-            onAlertSelect={openSourceModal} // 🆕 po wyszukaniu alertu otwieramy modal
+            onAlertSelect={openSourceModal} // 🆕 after searching for an alert, we open the modal
           />
         </section>
       </div>

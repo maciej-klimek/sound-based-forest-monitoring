@@ -20,7 +20,7 @@ export default function AlertsList({ sensors: sensorsProp, onSelect }) {
         const data = await res.json();
         if (alive) setSensors(data || []);
       } catch (e) {
-        if (alive) setError(e.message || "Błąd pobierania");
+        if (alive) setError(e.message || "Error while fetching sensors");
       } finally {
         if (alive) setLoading(false);
       }
@@ -28,9 +28,14 @@ export default function AlertsList({ sensors: sensorsProp, onSelect }) {
     return () => (alive = false);
   }, [sensorsProp]);
 
-  if (loading) return <div className="text-sm text-zinc-500">ładowanie…</div>;
-  if (error) return <div className="text-sm text-rose-600">błąd: {error}</div>;
-  if (!sensors?.length) return <div className="text-sm text-zinc-500">brak danych…</div>;
+  if (loading)
+    return <div className="text-sm text-zinc-500">loading…</div>;
+
+  if (error)
+    return <div className="text-sm text-rose-600">error: {error}</div>;
+
+  if (!sensors?.length)
+    return <div className="text-sm text-zinc-500">no data…</div>;
 
   return (
     <div className="space-y-3">

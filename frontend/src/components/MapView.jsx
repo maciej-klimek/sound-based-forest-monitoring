@@ -6,14 +6,14 @@ import {
   Marker,
   Popup,
   Circle,
-  CircleMarker,   // 🆕 mały punkt w środku okręgu
+  CircleMarker,   // 🆕 small point in the center of the circle
   ZoomControl,
 } from "react-leaflet";
 import L from "leaflet";
 import "../leaflet_fix";
 import SearchBox from "./SearchBox";
 
-const colorNew = "#ef4444"; // czerwony dla aktywnego źródła
+const colorNew = "#ef4444"; // red for active sources
 
 function sensorIcon(name) {
   const html = `
@@ -47,13 +47,13 @@ function sensorIcon(name) {
 }
 
 export default function MapView({
-  sources = [], // tylko new
+  sources = [], // only new
   sensors = [],
   mapRef,
   loading = false,
 }) {
   const markersRef = useRef({});
-  const sourceRefs = useRef({}); // referencje do kółek (alertów)
+  const sourceRefs = useRef({}); // references for circles (alerts)
   const [base, setBase] = useState("topo");
   const [showSources, setShowSources] = useState(true);
   const [showSensors, setShowSensors] = useState(true);
@@ -84,10 +84,10 @@ export default function MapView({
         }}
       />
 
-      {/* przełączniki bazowych map */}
+      {/* Base map switchers */}
       <div className="absolute z-[500] left-6 bottom-6 flex gap-2">
         <button
-          title="Topograficzna"
+          title="Topographic"
           onClick={() => setBase("topo")}
           className={`w-10 h-10 rounded-full border shadow bg-white grid place-items-center text-lg ${
             base === "topo" ? "ring-2 ring-zinc-300" : "hover:bg-zinc-50"
@@ -96,7 +96,7 @@ export default function MapView({
           🗺️
         </button>
         <button
-          title="Satelitarna"
+          title="Satellite"
           onClick={() => setBase("sat")}
           className={`w-10 h-10 rounded-full border shadow bg-white grid place-items-center text-lg ${
             base === "sat" ? "ring-2 ring-zinc-300" : "hover:bg-zinc-50"
@@ -106,11 +106,11 @@ export default function MapView({
         </button>
       </div>
 
-      {/* nakładki */}
+      {/* Overlay */}
       <div className="absolute z-[500] right-6 top-[88px]">
         <div className="bg-white/95 backdrop-blur border rounded-[12px] shadow px-2 py-1.5 text-[12px] space-y-1">
           <div className="text-xs text-zinc-500">
-            czujniki: {summary.sensors}, źródła: {summary.sources}
+            devices: {summary.sensors}, alerts: {summary.sources}
           </div>
           <label className="flex items-center gap-2">
             <input
@@ -118,7 +118,7 @@ export default function MapView({
               checked={showSources}
               onChange={(e) => setShowSources(e.target.checked)}
             />
-            Źródła
+            Sources
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -126,7 +126,7 @@ export default function MapView({
               checked={showSensors}
               onChange={(e) => setShowSensors(e.target.checked)}
             />
-            Czujniki
+            Sensors
           </label>
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function MapView({
           />
         )}
 
-        {/* ŹRÓDŁA – tylko alerty new */}
+        {/* ALERTS – only new */}
         {showSources &&
           sources.map((src) => (
             <Circle
@@ -174,13 +174,13 @@ export default function MapView({
                 <div className="space-y-1 text-sm">
                   <div className="font-semibold">{src.id}</div>
                   <div>Status: {src.status}</div>
-                  {src.createdAt && <div>Czas: {src.createdAt}</div>}
+                  {src.createdAt && <div>Time: {src.createdAt}</div>}
                   <div>
                     Lat/Lon: {src.lat.toFixed(4)}, {src.lon.toFixed(4)}
                   </div>
                   {src.devices?.length > 0 && (
                     <div>
-                      Czujniki:{" "}
+                      Sensors:{" "}
                       <span className="font-mono text-xs">
                         {src.devices.join(", ")}
                       </span>
@@ -191,7 +191,7 @@ export default function MapView({
             </Circle>
           ))}
 
-        {/* 🆕 PUNKT TRIANGULACJI W ŚRODKU OKRĘGU */}
+        {/* 🆕 TRIANGULATION POINT IN THE CENTER OF THE CIRCLE */}
         {showSources &&
           sources.map((src) => (
             <CircleMarker
@@ -199,15 +199,15 @@ export default function MapView({
               center={[src.lat, src.lon]}
               radius={5}
               pathOptions={{
-                color: "#b91c1c",     // ciemniejsza czerwień obwódki
+                color: "#b91c1c",     // darker red border
                 weight: 2,
-                fillColor: "#ffffff", // białe wypełnienie
+                fillColor: "#ffffff", // white fill
                 fillOpacity: 1,
               }}
             />
           ))}
 
-        {/* CZUJNIKI */}
+        {/* SENSORS */}
         {showSensors &&
           sensors.map((s) => (
             <Marker
@@ -222,7 +222,7 @@ export default function MapView({
             >
               <Popup autoPan keepInView>
                 <div className="space-y-1 text-sm">
-                  <div className="font-semibold">Czujnik {s.id}</div>
+                  <div className="font-semibold">Sensor {s.id}</div>
                   <div>
                     Lat/Lon: {s.lat.toFixed(4)}, {s.lon.toFixed(4)}
                   </div>
@@ -237,7 +237,7 @@ export default function MapView({
       {loading && (
         <div className="absolute inset-0 grid place-items-center pointer-events-none">
           <div className="bg-white/80 px-4 py-2 rounded-xl border shadow">
-            ładowanie mapy…
+            loading map…
           </div>
         </div>
       )}
