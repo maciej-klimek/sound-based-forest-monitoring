@@ -1,0 +1,6 @@
+alert_endpoint = "https://i18wwdizmk.execute-api.eu-north-1.amazonaws.com/alert"
+alerts_queue_url = "https://sqs.eu-north-1.amazonaws.com/218795110405/sound-forest-alerts.fifo"
+api_base_url = "https://i18wwdizmk.execute-api.eu-north-1.amazonaws.com"
+audio_bucket = "sound-forest-audio-bef8b2fe"
+register_endpoint = "https://i18wwdizmk.execute-api.eu-north-1.amazonaws.com/register"
+worker_public_ip = "51.20.91.164"
