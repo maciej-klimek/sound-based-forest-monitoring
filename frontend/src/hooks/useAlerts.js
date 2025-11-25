@@ -21,6 +21,8 @@ export function useAlerts(intervalMs = 10000) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
+        console.log("Raw JSON from /alerts:", json);
+
         if (!alive) return;
 
         const normalized = (json || []).map((a, idx) => ({
@@ -30,8 +32,11 @@ export function useAlerts(intervalMs = 10000) {
           createdAt: a.createdAt,
         }));
 
+        console.log("Normalized alerts:", normalized);
+
         setAlerts(normalized);
       } catch (e) {
+        console.error("Error fetching alerts:", e);
         if (alive) setError(e.message || "Błąd pobierania alertów");
       } finally {
         if (alive) setLoading(false);
