@@ -168,7 +168,7 @@ ssh -i ~/.ssh/iot_worker ec2-user@"$EC2_IP"
 Na serwerze:
 
 ```bash
-unzip -o worker_linux_amd64.zip
+unzip -o dist_ec2.zip
 chmod +x worker
 nohup ./worker > worker.log 2>&1 &
 tail -f worker.log

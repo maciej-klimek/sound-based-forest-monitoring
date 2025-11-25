@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
@@ -13,8 +14,10 @@ import (
 
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/config"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/handlers"
+	processor "github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/processor"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/queue"
 	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/repository"
+	"github.com/maciej-klimek/sound-based-forest-monitoring/infrastructure/ec2/router"
 )
 
 func main() {
@@ -35,9 +38,20 @@ func main() {
 	sqsCli := sqs.NewFromConfig(awsCfg)
 	ddbCli := dynamodb.NewFromConfig(awsCfg)
 
-	repo := repository.NewAlertsRepo(ddbCli, config.AppConfig.AWS.AlertsTable)
-	h := handlers.NewHandler(repo, logger)
+	repo := repository.NewRepo(ddbCli, config.AppConfig.AWS.AlertsTable, config.AppConfig.AWS.DevicesTable)
 
+	// tu narazie ustawiasz ttl dla kazdego alertu
+	mem := processor.NewMemory(2 * time.Minute)
+	h := handlers.NewHandler(repo, mem, logger)
+
+	r := router.SetupRouter(h)
+	go func() {
+		port := ":8080"
+		logger.Printf("HTTP server listening on %s", port)
+		if err := r.Run(port); err != nil {
+			logger.Fatalf("HTTP server error: %v", err)
+		}
+	}()
 	consumer := queue.NewConsumer(sqsCli, config.AppConfig.AWS.SQSURL, h.HandleEnvelope, logger)
 
 	logger.Printf("worker online; queue=%s table=%s", config.AppConfig.AWS.SQSURL, config.AppConfig.AWS.AlertsTable)

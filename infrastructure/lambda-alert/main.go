@@ -28,6 +28,7 @@ type alertReq struct {
 	TS       string  `json:"ts"`
 	Lat      float64 `json:"lat"`
 	Lon      float64 `json:"lon"`
+	Distance float64 `json:"distance"`
 	AudioB64 string  `json:"audioB64"`
 }
 
@@ -111,6 +112,7 @@ func handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.AP
 		"s3Key":     &ddbt.AttributeValueMemberS{Value: key},
 		"lat":       &ddbt.AttributeValueMemberN{Value: strconv.FormatFloat(in.Lat, 'f', -1, 64)},
 		"lon":       &ddbt.AttributeValueMemberN{Value: strconv.FormatFloat(in.Lon, 'f', -1, 64)},
+		"distance":  &ddbt.AttributeValueMemberN{Value: strconv.FormatFloat(in.Distance, 'f', -1, 64)},
 		"status":    &ddbt.AttributeValueMemberS{Value: "NEW"},
 		"checksum":  &ddbt.AttributeValueMemberS{Value: sha},
 		"createdAt": &ddbt.AttributeValueMemberS{Value: now},

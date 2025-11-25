@@ -14,4 +14,6 @@ type Alert struct {
 	Status    string  `dynamodbav:"status"    json:"status"`
 	Checksum  string  `dynamodbav:"checksum"  json:"checksum"`
 	CreatedAt string  `dynamodbav:"createdAt" json:"createdAt"`
+	// trzeba bedzie dodac
+	Distance float64 `dynamodbav:"distance" json:"distance"` // !!!!!
 }
