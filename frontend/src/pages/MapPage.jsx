@@ -1,4 +1,3 @@
-// src/pages/MapPage.jsx
 import { useMemo, useRef, useState } from "react";
 import MapView from "../components/MapView";
 import AlertsPanel from "../components/AlertsPanel";
@@ -67,7 +66,7 @@ export default function MapPage() {
             sources={activeSources}
             sensors={sensors}
             loading={sourcesLoading || sensorsLoading}
-            onAlertSelect={openSourceModal} // 🆕 after searching for an alert, we open the modal
+            onAlertSelect={openSourceModal} 
           />
         </section>
       </div>

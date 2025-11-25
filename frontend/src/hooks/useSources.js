@@ -1,4 +1,3 @@
-// src/hooks/useSources.js
 import { useEffect, useState } from "react";
 
 const API = import.meta.env.VITE_API_BASE_URL || "";
@@ -23,12 +22,13 @@ export function useSources(intervalMs = 10000) {
 
         if (!alive) return;
 
-        const rawSources = Array.isArray(json?.sources) ? json.sources : [];
+        const rawSources = Array.isArray(json) 
+          ? json 
+          : (Array.isArray(json?.sources) ? json.sources : []);
 
         const normalized = rawSources.map((src, idx) => {
           const alerts = Array.isArray(src.alerts) ? src.alerts : [];
-
-          // Status źródła: jeśli wśród odczytów jest chociaż jeden "new" → "new"
+          
           const hasNew = alerts.some((a) => a.status === "new");
           const status = hasNew ? "new" : "resolved";
 
@@ -36,27 +36,38 @@ export function useSources(intervalMs = 10000) {
             ...new Set(alerts.map((a) => a.deviceId).filter(Boolean)),
           ];
 
-          // czas utworzenia (bierzemy najwcześniejszy createdAt z odczytów)
-          const createdAt =
-            alerts
-              .map((a) => a.createdAt)
-              .filter(Boolean)
-              .sort()[0] || null;
+          const createdAt = alerts
+            .map((a) => a.createdAt || a.ts)
+            .filter(Boolean)
+            .sort()[0] || null;
+
+          const cleanAlerts = alerts.map(a => ({
+            ...a,
+            lat: Number(a.lat),
+            lon: Number(a.lon),
+            distance: Number(a.distance) || 0
+          }));
+
+
+          let displayId = src.id || `S${String(idx + 1).padStart(3, '0')}`;
+          displayId = displayId.replace('S', 'A'); 
 
           return {
-            id: src.id || `SRC-${idx + 1}`,
+            id: displayId, 
+            originalId: src.id,
             lat: Number(src.lat),
             lon: Number(src.lon),
             status,
-            devices,
+            devices,      
             createdAt,
-            rawAlerts: alerts,
+            rawAlerts: cleanAlerts,
           };
         });
-
+        
         setSources(normalized);
       } catch (e) {
-        if (alive) setError(e.message || "Błąd pobierania źródeł");
+        console.error(e);
+        if (alive) setError(e.message || "Błąd danych");
       } finally {
         if (alive) setLoading(false);
       }

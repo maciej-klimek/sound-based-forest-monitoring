@@ -9,9 +9,9 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',   // tu działa Twój json-server
+        target: 'http://localhost:4000',  
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), // /api/alerts -> /alerts
+        rewrite: (path) => path.replace(/^\/api/, ''), 
       },
     },
   },

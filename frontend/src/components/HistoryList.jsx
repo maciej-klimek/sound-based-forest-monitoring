@@ -1,234 +1,149 @@
-// src/components/HistoryList.jsx
 import { useMemo, useState } from "react";
 
-export default function HistoryList({ alerts = [], sourcesIndex = {}, onShow }) {
-  const [qMain, setQMain] = useState("");   // ID / status / device
-  const [qLat, setQLat] = useState("");     // filter by lat
-  const [qLon, setQLon] = useState("");     // filter by lon
-
+export default function HistoryList({ items = [], onShow }) {
+  const [q, setQ] = useState("");       
+  const [qLat, setQLat] = useState(""); 
+  const [qLon, setQLon] = useState(""); 
+  
   const [sortField, setSortField] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
 
-  // matching lat with simple operators
-  const matchesLat = (alertLat) => {
-    const v = qLat.trim();
-    if (!v) return true;
-    if (alertLat == null) return false;
-
-    const m = v.match(/^([<>]=?)?\s*(-?\d+(?:\.\d+)?)/);
-    if (m) {
-      const op = m[1];
-      const num = parseFloat(m[2]);
-      if (isNaN(num)) return true;
-      if (!op) return alertLat.toFixed(4).includes(m[2]);
-      if (op === ">") return alertLat > num;
-      if (op === "<") return alertLat < num;
-      if (op === ">=") return alertLat >= num;
-      if (op === "<=") return alertLat <= num;
-      return true;
-    }
-
-    return alertLat.toFixed(4).includes(v);
+  const matchesCoord = (val, filter) => {
+    if (!filter.trim()) return true;
+    if (val == null) return false;
+    return val.toFixed(5).includes(filter.trim());
   };
 
-  // matching lon with simple operators
-  const matchesLon = (alertLon) => {
-    const v = qLon.trim();
-    if (!v) return true;
-    if (alertLon == null) return false;
+  const processedItems = useMemo(() => {
+    let data = [...items];
 
-    const m = v.match(/^([<>]=?)?\s*(-?\d+(?:\.\d+)?)/);
-    if (m) {
-      const op = m[1];
-      const num = parseFloat(m[2]);
-      if (isNaN(num)) return true;
-      if (!op) return alertLon.toFixed(4).includes(m[2]);
-      if (op === ">") return alertLon > num;
-      if (op === "<") return alertLon < num;
-      if (op === ">=") return alertLon >= num;
-      if (op === "<=") return alertLon <= num;
-      return true;
-    }
+    data = data.filter(item => {
+      const lowerQ = q.toLowerCase();
+      const matchMain = !lowerQ || 
+        item.id.toLowerCase().includes(lowerQ) ||
+        item.status.toLowerCase().includes(lowerQ) ||
+        item.devices.some(d => d.toLowerCase().includes(lowerQ));
 
-    return alertLon.toFixed(4).includes(v);
-  };
+      const matchLat = matchesCoord(item.lat, qLat);
+      const matchLon = matchesCoord(item.lon, qLon);
 
-  const enriched = useMemo(() => {
-    const withCoords = alerts.map((a) => {
-      const src = sourcesIndex[a.id];
-      return {
-        ...a,
-        lat: src?.lat ?? null,
-        lon: src?.lon ?? null,
-        devices: a.devices,
-        _sourceRawAlerts: src?.rawAlerts || [],
-      };
+      return matchMain && matchLat && matchLon;
     });
 
-    const filtered = withCoords.filter((a) => {
-      const main = qMain.trim().toLowerCase();
+    data.sort((a, b) => {
+      let valA = a[sortField];
+      let valB = b[sortField];
 
-      const okMain =
-        !main ||
-        a.id.toLowerCase().includes(main) ||
-        (a.status || "").toLowerCase().includes(main) ||
-        a.devices.some((d) => d.toLowerCase().includes(main));
+      if (!valA) valA = "";
+      if (!valB) valB = "";
 
-      const okLat = matchesLat(a.lat);
-      const okLon = matchesLon(a.lon);
-
-      return okMain && okLat && okLon;
-    });
-
-    const sorted = [...filtered].sort((a, b) => {
-      let va, vb;
-      if (sortField === "id") {
-        va = a.id;
-        vb = b.id;
-      } else if (sortField === "status") {
-        va = a.status || "";
-        vb = b.status || "";
-      } else {
-        va = a.createdAt || "";
-        vb = b.createdAt || "";
-      }
-      if (va < vb) return sortDir === "asc" ? -1 : 1;
-      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      if (valA < valB) return sortDir === "asc" ? -1 : 1;
+      if (valA > valB) return sortDir === "asc" ? 1 : -1;
       return 0;
     });
 
-    return sorted;
-  }, [alerts, sourcesIndex, qMain, qLat, qLon, sortField, sortDir]);
+    return data;
+  }, [items, q, qLat, qLon, sortField, sortDir]);
 
-  const total = enriched.length;
-  const current = enriched;
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("desc");
+    }
+  };
 
-  const rowClass = (status) =>
-    status === "new" ? "pastel pastel-rose" : "pastel pastel-neutral";
+  const Arrow = ({ field }) => {
+    if (sortField !== field) return <span className="text-zinc-300 ml-1">⇅</span>;
+    return <span className="text-black ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>;
+  };
 
   return (
-    <div className="card p-6">
-      <h2 className="text-3xl font-black mb-4">Alert History</h2>
+    <div className="card p-6 h-[700px] flex flex-col shadow-xl bg-white">
+      <div className="flex justify-between items-end mb-4">
+          <h2 className="text-3xl font-black text-zinc-800">Alert History</h2>
+          <span className="text-xs text-zinc-400 font-mono">Total: {processedItems.length}</span>
+      </div>
 
-      {/* FILTERS + SORTING (one line on desktop) */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        {/* search: ID / status / device */}
+      <div className="mb-4 flex gap-2">
         <input
-          value={qMain}
-          onChange={(e) => setQMain(e.target.value)}
-          placeholder="ID / status / device…"
-          className="border rounded-full px-4 py-2 text-sm w-[240px]"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search ID / device"
+          className="border rounded-lg px-4 py-2 text-sm w-full shadow-sm focus:ring-2 ring-zinc-200 outline-none transition"
         />
+        
+        <input
+          value={qLat}
+          onChange={(e) => setQLat(e.target.value)}
+          placeholder="Lat"
+          className="border rounded-lg px-2 py-2 text-sm w-[100px] text-center shadow-sm focus:ring-2 ring-zinc-200 outline-none transition"
+        />
+        <input
+          value={qLon}
+          onChange={(e) => setQLon(e.target.value)}
+          placeholder="Lon"
+          className="border rounded-lg px-2 py-2 text-sm w-[100px] text-center shadow-sm focus:ring-2 ring-zinc-200 outline-none transition"
+        />
+      </div>
 
-        {/* Lat / Lon */}
-        <div className="flex items-center gap-2">
-          <input
-            value={qLat}
-            onChange={(e) => setQLat(e.target.value)}
-            placeholder="Lat"
-            className="border rounded-full px-3 py-2 text-sm w-[80px]"
-          />
-          <input
-            value={qLon}
-            onChange={(e) => setQLon(e.target.value)}
-            placeholder="Lon"
-            className="border rounded-full px-3 py-2 text-sm w-[80px]"
-          />
+      <div className="grid grid-cols-[80px_140px_1fr_1fr_100px] gap-4 pb-2 border-b text-[10px] font-bold text-zinc-400 uppercase tracking-wider select-none">
+        <div onClick={() => handleSort('id')} className="cursor-pointer hover:text-zinc-600 transition">
+            ID <Arrow field="id"/>
         </div>
-
-        {/* sort pills */}
-        <div className="flex items-center gap-2">
-          {[
-            { key: "createdAt", label: "Time" },
-            { key: "id", label: "ID" },
-            { key: "status", label: "Status" },
-          ].map((btn) => {
-            const active = sortField === btn.key;
-            const arrow = sortDir === "asc" ? "▲" : "▼";
-
-            return (
-              <button
-                key={btn.key}
-                type="button"
-                onClick={() => {
-                  if (active) {
-                    setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-                  } else {
-                    setSortField(btn.key);
-                    setSortDir("desc");
-                  }
-                }}
-                className={
-                  "flex items-center justify-center gap-1 px-3 py-2 rounded-full border text-xs font-semibold min-w-[90px] transition " +
-                  (active
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-black border-zinc-400 hover:bg-zinc-100")
-                }
-              >
-                <span>{btn.label}</span>
-                <span className="text-[10px]">{arrow}</span>
-              </button>
-            );
-          })}
+        <div onClick={() => handleSort('createdAt')} className="cursor-pointer hover:text-zinc-600 transition">
+            Time <Arrow field="createdAt"/>
         </div>
-
-        <div className="text-xs text-zinc-500 ml-auto">
-          {total} alerts
+        <div>Devices</div>
+        <div>Location</div>
+        <div onClick={() => handleSort('status')} className="cursor-pointer hover:text-zinc-600 text-right transition">
+            Status <Arrow field="status"/>
         </div>
       </div>
 
-      {/* LIST – scrollable */}
-      <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
-        {current.map((it) => (
+      <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1 pt-2">
+        {processedItems.map((item) => (
           <button
-            key={it.id + it.createdAt}
+            key={item.id}
             type="button"
-            onClick={() =>
-              onShow?.({
-                id: it.id,
-                status: it.status,
-                createdAt: it.createdAt,
-                lat: it.lat,
-                lon: it.lon,
-                devices: it.devices,
-                events: it._sourceRawAlerts,
-              })
-            }
-            className={`w-full text-left ${rowClass(it.status)}`}
+            onClick={() => onShow?.(item)}
+            className={`w-full text-left p-4 rounded-xl border transition group grid grid-cols-[80px_140px_1fr_1fr_100px] items-center gap-4
+              ${item.status === 'new' ? 'bg-rose-50/50 hover:bg-rose-100/50 border-rose-100' : 'bg-white hover:bg-zinc-50 border-zinc-200'}
+            `}
           >
-            <div className="grid md:grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3">
-              <div className="font-extrabold text-[20px] md:mr-2">
-                {it.id}
-              </div>
+            <div className="font-mono font-bold text-lg text-zinc-700 group-hover:text-black transition">
+              {item.id}
+            </div>
 
-              <div className="text-sm">
-                <span className="text-zinc-500 mr-1">Time:</span>{" "}
-                {it.createdAt || "—"}
-              </div>
+            <div className="text-xs text-zinc-600 font-medium">
+               {item.createdAt?.replace('T', ' ').replace('Z', '') || "—"}
+            </div>
 
-              <div className="text-sm md:text-right">
-                <span className="text-zinc-500">Status:</span> {it.status}
-              </div>
+            <div className="flex flex-wrap gap-1">
+               {item.devices.length > 0 ? item.devices.map(dev => (
+                 <span key={dev} className="text-[10px] font-mono bg-white border border-zinc-300 px-1.5 py-0.5 rounded text-zinc-600">
+                    {dev.replace('device-', '')}
+                 </span>
+               )) : <span className="text-zinc-300 italic text-xs">No devices</span>}
+            </div>
 
-              <div className="text-sm md:text-right">
-                <span className="text-zinc-500">Lat/Lon:</span>{" "}
-                {it.lat != null && it.lon != null
-                  ? `${it.lat.toFixed(4)}, ${it.lon.toFixed(4)}`
-                  : "—"}
-              </div>
+            <div className="text-xs font-mono text-zinc-600">
+                {item.lat?.toFixed(4)}, {item.lon?.toFixed(4)}
+            </div>
 
-              <div className="text-sm md:text-right">
-                <span className="text-zinc-500">Devices:</span>{" "}
-                <span className="font-mono text-xs">
-                  {it.devices?.join(", ") || "—"}
-                </span>
-              </div>
+            <div className="text-right">
+              <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase shadow-sm ${item.status === 'new' ? 'bg-rose-500 text-white' : 'bg-zinc-200 text-zinc-500'}`}>
+                  {item.status}
+              </span>
             </div>
           </button>
         ))}
 
-        {current.length === 0 && (
-          <div className="text-sm text-zinc-500">no results</div>
+        {processedItems.length === 0 && (
+            <div className="text-center py-10 text-zinc-400 italic">
+                No alerts found matching filters.
+            </div>
         )}
       </div>
     </div>

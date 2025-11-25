@@ -1,129 +1,888 @@
 {
-  "sources": {
-    "count": 2,
-    "sources": [
-      {
-        "id": "A001",
-        "lat": 50.0616,
-        "lon": 19.9387,
-        "alerts": [
-          {
-            "deviceId": "device-001",
-            "ts": "2025-11-17T12:34:56Z",
-            "s3Key": "alerts/2025/11/17/device-001/rec1.wav",
-            "status": "new",
-            "checksum": "abcdef123456",
-            "createdAt": "2025-11-17T12:35:00Z"
-          },
-          {
-            "deviceId": "device-002",
-            "ts": "2025-11-17T12:35:10Z",
-            "s3Key": "alerts/2025/11/17/device-002/rec2.wav",
-            "status": "new",
-            "checksum": "012345abcdef",
-            "createdAt": "2025-11-17T12:35:12Z"
-          },
-          {
-            "deviceId": "device-003",
-            "ts": "2025-11-17T12:35:20Z",
-            "s3Key": "alerts/2025/11/17/device-003/rec3.wav",
-            "status": "new",
-            "checksum": "999999aaaaaa",
-            "createdAt": "2025-11-17T12:35:22Z"
-          }
-        ]
-      },
-      {
-        "id": "A002",
-        "lat": 50.0668,
-        "lon": 19.9302,
-        "alerts": [
-          {
-            "deviceId": "device-004",
-            "ts": "2025-11-17T12:40:10Z",
-            "s3Key": "alerts/2025/11/17/device-004/rec1.wav",
-            "status": "resolved",
-            "checksum": "fedcba654321",
-            "createdAt": "2025-11-17T12:40:10Z"
-          },
-          {
-            "deviceId": "device-005",
-            "ts": "2025-11-17T12:40:15Z",
-            "s3Key": "alerts/2025/11/17/device-005/rec2.wav",
-            "status": "resolved",
-            "checksum": "bbbbbb222222",
-            "createdAt": "2025-11-17T12:40:16Z"
-          },
-          {
-            "deviceId": "device-006",
-            "ts": "2025-11-17T12:40:20Z",
-            "s3Key": "alerts/2025/11/17/device-006/rec3.wav",
-            "status": "resolved",
-            "checksum": "cccccc333333",
-            "createdAt": "2025-11-17T12:40:21Z"
-          }
-        ]
-      }
-    ]
-  },
-
+  "sources": [
+    {
+      "id": "S001",
+      "lat": 50.0616,
+      "lon": 19.9397,
+      "alerts": [
+        {
+          "deviceId": "device-001",
+          "ts": "2025-10-08T17:35:00Z",
+          "s3Key": "alerts/2025/11/17/device-001/alert1.wav",
+          "status": "resolved",
+          "checksum": "745123abcdef",
+          "createdAt": "2025-10-08T17:35:00Z",
+          "lat": 50.0712,
+          "lon": 19.9314,
+          "distance": 245
+        },
+        {
+          "deviceId": "device-002",
+          "ts": "2025-10-08T17:36:00Z",
+          "s3Key": "alerts/2025/11/17/device-002/alert2.wav",
+          "status": "new",
+          "checksum": "a38492abcdef",
+          "createdAt": "2025-10-08T17:36:00Z",
+          "lat": 50.0628,
+          "lon": 19.9402,
+          "distance": 138
+        },
+        {
+          "deviceId": "device-003",
+          "ts": "2025-10-08T17:37:00Z",
+          "s3Key": "alerts/2025/11/17/device-003/alert3.wav",
+          "status": "new",
+          "checksum": "b2875def1234",
+          "createdAt": "2025-10-08T17:37:00Z",
+          "lat": 50.0602,
+          "lon": 19.9315,
+          "distance": 405
+        }
+      ]
+    },
+    {
+      "id": "S002",
+      "lat": 50.0605,
+      "lon": 19.9308,
+      "alerts": [
+        {
+          "deviceId": "device-004",
+          "ts": "2025-10-08T17:45:00Z",
+          "s3Key": "alerts/2025/11/17/device-004/alert1.wav",
+          "status": "new",
+          "checksum": "9f12ab12cd34",
+          "createdAt": "2025-10-08T17:45:00Z",
+          "lat": 50.0670,
+          "lon": 19.9345,
+          "distance": 468
+        },
+        {
+          "deviceId": "device-005",
+          "ts": "2025-10-08T17:46:00Z",
+          "s3Key": "alerts/2025/11/17/device-005/alert2.wav",
+          "status": "resolved",
+          "checksum": "f4564b345cd3",
+          "createdAt": "2025-10-08T17:46:00Z",
+          "lat": 50.0635,
+          "lon": 19.9333,
+          "distance": 276
+        },
+        {
+          "deviceId": "device-006",
+          "ts": "2025-10-08T17:47:00Z",
+          "s3Key": "alerts/2025/11/17/device-006/alert3.wav",
+          "status": "resolved",
+          "checksum": "da3423b512ab",
+          "createdAt": "2025-10-08T17:47:00Z",
+          "lat": 50.0655,
+          "lon": 19.9365,
+          "distance": 384
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "lat": 50.0678,
+      "lon": 19.9347,
+      "alerts": [
+        {
+          "deviceId": "device-007",
+          "ts": "2025-10-08T18:00:00Z",
+          "s3Key": "alerts/2025/11/17/device-007/alert1.wav",
+          "status": "new",
+          "checksum": "34ab12a324ab",
+          "createdAt": "2025-10-08T18:00:00Z",
+          "lat": 50.0680,
+          "lon": 19.9350,
+          "distance": 30
+        },
+        {
+          "deviceId": "device-008",
+          "ts": "2025-10-08T18:01:00Z",
+          "s3Key": "alerts/2025/11/17/device-008/alert2.wav",
+          "status": "resolved",
+          "checksum": "fd9834bbdc13",
+          "createdAt": "2025-10-08T18:01:00Z",
+          "lat": 50.0685,
+          "lon": 19.9355,
+          "distance": 95
+        },
+        {
+          "deviceId": "device-009",
+          "ts": "2025-10-08T18:02:00Z",
+          "s3Key": "alerts/2025/11/17/device-009/alert3.wav",
+          "status": "new",
+          "checksum": "928312b34f4a",
+          "createdAt": "2025-10-08T18:02:00Z",
+          "lat": 50.0675,
+          "lon": 19.9340,
+          "distance": 60
+        }
+      ]
+    },
+    {
+      "id": "S004",
+      "lat": 50.0731,
+      "lon": 19.9225,
+      "alerts": [
+        {
+          "deviceId": "device-010",
+          "ts": "2025-10-08T18:05:00Z",
+          "s3Key": "alerts/2025/11/17/device-010/alert1.wav",
+          "status": "new",
+          "checksum": "c29a4d12cd89",
+          "createdAt": "2025-10-08T18:05:00Z",
+          "lat": 50.0735,
+          "lon": 19.9230,
+          "distance": 55
+        },
+        {
+          "deviceId": "device-011",
+          "ts": "2025-10-08T18:06:00Z",
+          "s3Key": "alerts/2025/11/17/device-011/alert2.wav",
+          "status": "resolved",
+          "checksum": "b91747de44ab",
+          "createdAt": "2025-10-08T18:06:00Z",
+          "lat": 50.0728,
+          "lon": 19.9220,
+          "distance": 48
+        },
+        {
+          "deviceId": "device-012",
+          "ts": "2025-10-08T18:07:00Z",
+          "s3Key": "alerts/2025/11/17/device-012/alert3.wav",
+          "status": "new",
+          "checksum": "ba0f13f24a99",
+          "createdAt": "2025-10-08T18:07:00Z",
+          "lat": 50.0733,
+          "lon": 19.9228,
+          "distance": 31
+        }
+      ]
+    },
+    {
+      "id": "S005",
+      "lat": 50.0801,
+      "lon": 19.9201,
+      "alerts": [
+        {
+          "deviceId": "device-013",
+          "ts": "2025-10-08T18:10:00Z",
+          "s3Key": "alerts/2025/11/17/device-013/alert1.wav",
+          "status": "resolved",
+          "checksum": "bf1234ef5678",
+          "createdAt": "2025-10-08T18:10:00Z",
+          "lat": 50.0805,
+          "lon": 19.9205,
+          "distance": 52
+        },
+        {
+          "deviceId": "device-014",
+          "ts": "2025-10-08T18:11:00Z",
+          "s3Key": "alerts/2025/11/17/device-014/alert2.wav",
+          "status": "resolved",
+          "checksum": "23fb49ee6764",
+          "createdAt": "2025-10-08T18:11:00Z",
+          "lat": 50.0798,
+          "lon": 19.9198,
+          "distance": 38
+        },
+        {
+          "deviceId": "device-015",
+          "ts": "2025-10-08T18:12:00Z",
+          "s3Key": "alerts/2025/11/17/device-015/alert3.wav",
+          "status": "resolved",
+          "checksum": "df1021ed6b44",
+          "createdAt": "2025-10-08T18:12:00Z",
+          "lat": 50.0803,
+          "lon": 19.9203,
+          "distance": 25
+        }
+      ]
+    },
+    {
+      "id": "S006",
+      "lat": 50.0850,
+      "lon": 19.9250,
+      "alerts": [
+        {
+          "deviceId": "device-016",
+          "ts": "2025-10-08T18:15:00Z",
+          "s3Key": "alerts/2025/11/17/device-016/alert1.wav",
+          "status": "new",
+          "checksum": "a1b2c3d4e5f6",
+          "createdAt": "2025-10-08T18:15:00Z",
+          "lat": 50.0855,
+          "lon": 19.9255,
+          "distance": 65
+        },
+        {
+          "deviceId": "device-017",
+          "ts": "2025-10-08T18:16:00Z",
+          "s3Key": "alerts/2025/11/17/device-017/alert2.wav",
+          "status": "new",
+          "checksum": "123456789abc",
+          "createdAt": "2025-10-08T18:16:00Z",
+          "lat": 50.0848,
+          "lon": 19.9248,
+          "distance": 26
+        },
+        {
+          "deviceId": "device-018",
+          "ts": "2025-10-08T18:17:00Z",
+          "s3Key": "alerts/2025/11/17/device-018/alert3.wav",
+          "status": "resolved",
+          "checksum": "def456789012",
+          "createdAt": "2025-10-08T18:17:00Z",
+          "lat": 50.0852,
+          "lon": 19.9252,
+          "distance": 25
+        }
+      ]
+    },
+    {
+      "id": "S007",
+      "lat": 50.0550,
+      "lon": 19.9500,
+      "alerts": [
+        {
+          "deviceId": "device-019",
+          "ts": "2025-10-08T18:20:00Z",
+          "s3Key": "alerts/2025/11/17/device-019/alert1.wav",
+          "status": "resolved",
+          "checksum": "887766554433",
+          "createdAt": "2025-10-08T18:20:00Z",
+          "lat": 50.0555,
+          "lon": 19.9505,
+          "distance": 66
+        },
+        {
+          "deviceId": "device-020",
+          "ts": "2025-10-08T18:21:00Z",
+          "s3Key": "alerts/2025/11/17/device-020/alert2.wav",
+          "status": "new",
+          "checksum": "aabbccddeeff",
+          "createdAt": "2025-10-08T18:21:00Z",
+          "lat": 50.0548,
+          "lon": 19.9498,
+          "distance": 27
+        },
+        {
+          "deviceId": "device-021",
+          "ts": "2025-10-08T18:22:00Z",
+          "s3Key": "alerts/2025/11/17/device-021/alert3.wav",
+          "status": "new",
+          "checksum": "112233445566",
+          "createdAt": "2025-10-08T18:22:00Z",
+          "lat": 50.0552,
+          "lon": 19.9502,
+          "distance": 26
+        }
+      ]
+    },
+    {
+      "id": "S008",
+      "lat": 50.0400,
+      "lon": 19.9100,
+      "alerts": [
+        {
+          "deviceId": "device-022",
+          "ts": "2025-10-08T18:25:00Z",
+          "s3Key": "alerts/2025/11/17/device-022/alert1.wav",
+          "status": "resolved",
+          "checksum": "998877665544",
+          "createdAt": "2025-10-08T18:25:00Z",
+          "lat": 50.0405,
+          "lon": 19.9105,
+          "distance": 65
+        },
+        {
+          "deviceId": "device-023",
+          "ts": "2025-10-08T18:26:00Z",
+          "s3Key": "alerts/2025/11/17/device-023/alert2.wav",
+          "status": "resolved",
+          "checksum": "554433221100",
+          "createdAt": "2025-10-08T18:26:00Z",
+          "lat": 50.0398,
+          "lon": 19.9098,
+          "distance": 26
+        },
+        {
+          "deviceId": "device-024",
+          "ts": "2025-10-08T18:27:00Z",
+          "s3Key": "alerts/2025/11/17/device-024/alert3.wav",
+          "status": "new",
+          "checksum": "009988776655",
+          "createdAt": "2025-10-08T18:27:00Z",
+          "lat": 50.0402,
+          "lon": 19.9102,
+          "distance": 26
+        }
+      ]
+    },
+    {
+      "id": "S009",
+      "lat": 50.0900,
+      "lon": 19.9600,
+      "alerts": [
+        {
+          "deviceId": "device-025",
+          "ts": "2025-10-08T18:30:00Z",
+          "s3Key": "alerts/2025/11/17/device-025/alert1.wav",
+          "status": "new",
+          "checksum": "fedcba987654",
+          "createdAt": "2025-10-08T18:30:00Z",
+          "lat": 50.0905,
+          "lon": 19.9605,
+          "distance": 65
+        },
+        {
+          "deviceId": "device-026",
+          "ts": "2025-10-08T18:31:00Z",
+          "s3Key": "alerts/2025/11/17/device-026/alert2.wav",
+          "status": "new",
+          "checksum": "456789abcdef",
+          "createdAt": "2025-10-08T18:31:00Z",
+          "lat": 50.0898,
+          "lon": 19.9598,
+          "distance": 26
+        },
+        {
+          "deviceId": "device-027",
+          "ts": "2025-10-08T18:32:00Z",
+          "s3Key": "alerts/2025/11/17/device-027/alert3.wav",
+          "status": "resolved",
+          "checksum": "1a2b3c4d5e6f",
+          "createdAt": "2025-10-08T18:32:00Z",
+          "lat": 50.0902,
+          "lon": 19.9602,
+          "distance": 26
+        }
+      ]
+    },
+    {
+      "id": "S010",
+      "lat": 50.0350,
+      "lon": 19.9450,
+      "alerts": [
+        {
+          "deviceId": "device-028",
+          "ts": "2025-10-08T18:35:00Z",
+          "s3Key": "alerts/2025/11/17/device-028/alert1.wav",
+          "status": "new",
+          "checksum": "6f5e4d3c2b1a",
+          "createdAt": "2025-10-08T18:35:00Z",
+          "lat": 50.0355,
+          "lon": 19.9455,
+          "distance": 66
+        },
+        {
+          "deviceId": "device-029",
+          "ts": "2025-10-08T18:36:00Z",
+          "s3Key": "alerts/2025/11/17/device-029/alert2.wav",
+          "status": "resolved",
+          "checksum": "1122aabb33cc",
+          "createdAt": "2025-10-08T18:36:00Z",
+          "lat": 50.0348,
+          "lon": 19.9448,
+          "distance": 26
+        },
+        {
+          "deviceId": "device-030",
+          "ts": "2025-10-08T18:37:00Z",
+          "s3Key": "alerts/2025/11/17/device-030/alert3.wav",
+          "status": "new",
+          "checksum": "cc33bbaa2211",
+          "createdAt": "2025-10-08T18:37:00Z",
+          "lat": 50.0352,
+          "lon": 19.9452,
+          "distance": 26
+        }
+      ]
+    }
+  ],
   "alerts": [
     {
       "id": "A001",
-      "status": "new",
-      "devices": ["device-001", "device-002", "device-003"],
-      "createdAt": "2025-11-17T12:35:00Z"
+      "status": "resolved",
+      "deviceId": "device-001",
+      "createdAt": "2025-10-08T17:35:00Z",
+      "lat": 50.0712,
+      "lon": 19.9314,
+      "distance": 1245
     },
     {
       "id": "A002",
+      "status": "new",
+      "deviceId": "device-002",
+      "createdAt": "2025-10-08T17:36:00Z",
+      "lat": 50.0628,
+      "lon": 19.9402,
+      "distance": 138
+    },
+    {
+      "id": "A003",
+      "status": "new",
+      "deviceId": "device-003",
+      "createdAt": "2025-10-08T17:37:00Z",
+      "lat": 50.0602,
+      "lon": 19.9315,
+      "distance": 605
+    },
+    {
+      "id": "A004",
+      "status": "new",
+      "deviceId": "device-004",
+      "createdAt": "2025-10-08T17:45:00Z",
+      "lat": 50.0670,
+      "lon": 19.9345,
+      "distance": 768
+    },
+    {
+      "id": "A005",
       "status": "resolved",
-      "devices": ["device-004", "device-005", "device-006"],
-      "createdAt": "2025-11-17T12:40:10Z"
+      "deviceId": "device-005",
+      "createdAt": "2025-10-08T17:46:00Z",
+      "lat": 50.0635,
+      "lon": 19.9333,
+      "distance": 376
+    },
+    {
+      "id": "A006",
+      "status": "resolved",
+      "deviceId": "device-006",
+      "createdAt": "2025-10-08T17:47:00Z",
+      "lat": 50.0655,
+      "lon": 19.9365,
+      "distance": 684
+    },
+    {
+      "id": "A007",
+      "status": "new",
+      "deviceId": "device-007",
+      "createdAt": "2025-10-08T18:00:00Z",
+      "lat": 50.0680,
+      "lon": 19.9350,
+      "distance": 30
+    },
+    {
+      "id": "A008",
+      "status": "resolved",
+      "deviceId": "device-008",
+      "createdAt": "2025-10-08T18:01:00Z",
+      "lat": 50.0685,
+      "lon": 19.9355,
+      "distance": 95
+    },
+    {
+      "id": "A009",
+      "status": "new",
+      "deviceId": "device-009",
+      "createdAt": "2025-10-08T18:02:00Z",
+      "lat": 50.0675,
+      "lon": 19.9340,
+      "distance": 60
+    },
+    {
+      "id": "A010",
+      "status": "new",
+      "deviceId": "device-010",
+      "createdAt": "2025-10-08T18:05:00Z",
+      "lat": 50.0735,
+      "lon": 19.9230,
+      "distance": 55
+    },
+    {
+      "id": "A011",
+      "status": "resolved",
+      "deviceId": "device-011",
+      "createdAt": "2025-10-08T18:06:00Z",
+      "lat": 50.0728,
+      "lon": 19.9220,
+      "distance": 48
+    },
+    {
+      "id": "A012",
+      "status": "new",
+      "deviceId": "device-012",
+      "createdAt": "2025-10-08T18:07:00Z",
+      "lat": 50.0733,
+      "lon": 19.9228,
+      "distance": 31
+    },
+    {
+      "id": "A013",
+      "status": "resolved",
+      "deviceId": "device-013",
+      "createdAt": "2025-10-08T18:10:00Z",
+      "lat": 50.0805,
+      "lon": 19.9205,
+      "distance": 52
+    },
+    {
+      "id": "A014",
+      "status": "resolved",
+      "deviceId": "device-014",
+      "createdAt": "2025-10-08T18:11:00Z",
+      "lat": 50.0798,
+      "lon": 19.9198,
+      "distance": 38
+    },
+    {
+      "id": "A015",
+      "status": "resolved",
+      "deviceId": "device-015",
+      "createdAt": "2025-10-08T18:12:00Z",
+      "lat": 50.0803,
+      "lon": 19.9203,
+      "distance": 25
+    },
+    {
+      "id": "A016",
+      "status": "new",
+      "deviceId": "device-016",
+      "createdAt": "2025-10-08T18:15:00Z",
+      "lat": 50.0855,
+      "lon": 19.9255,
+      "distance": 65
+    },
+    {
+      "id": "A017",
+      "status": "new",
+      "deviceId": "device-017",
+      "createdAt": "2025-10-08T18:16:00Z",
+      "lat": 50.0848,
+      "lon": 19.9248,
+      "distance": 26
+    },
+    {
+      "id": "A018",
+      "status": "resolved",
+      "deviceId": "device-018",
+      "createdAt": "2025-10-08T18:17:00Z",
+      "lat": 50.0852,
+      "lon": 19.9252,
+      "distance": 25
+    },
+    {
+      "id": "A019",
+      "status": "resolved",
+      "deviceId": "device-019",
+      "createdAt": "2025-10-08T18:20:00Z",
+      "lat": 50.0555,
+      "lon": 19.9505,
+      "distance": 66
+    },
+    {
+      "id": "A020",
+      "status": "new",
+      "deviceId": "device-020",
+      "createdAt": "2025-10-08T18:21:00Z",
+      "lat": 50.0548,
+      "lon": 19.9498,
+      "distance": 27
+    },
+    {
+      "id": "A021",
+      "status": "new",
+      "deviceId": "device-021",
+      "createdAt": "2025-10-08T18:22:00Z",
+      "lat": 50.0552,
+      "lon": 19.9502,
+      "distance": 26
+    },
+    {
+      "id": "A022",
+      "status": "resolved",
+      "deviceId": "device-022",
+      "createdAt": "2025-10-08T18:25:00Z",
+      "lat": 50.0405,
+      "lon": 19.9105,
+      "distance": 65
+    },
+    {
+      "id": "A023",
+      "status": "resolved",
+      "deviceId": "device-023",
+      "createdAt": "2025-10-08T18:26:00Z",
+      "lat": 50.0398,
+      "lon": 19.9098,
+      "distance": 26
+    },
+    {
+      "id": "A024",
+      "status": "new",
+      "deviceId": "device-024",
+      "createdAt": "2025-10-08T18:27:00Z",
+      "lat": 50.0402,
+      "lon": 19.9102,
+      "distance": 26
+    },
+    {
+      "id": "A025",
+      "status": "new",
+      "deviceId": "device-025",
+      "createdAt": "2025-10-08T18:30:00Z",
+      "lat": 50.0905,
+      "lon": 19.9605,
+      "distance": 65
+    },
+    {
+      "id": "A026",
+      "status": "new",
+      "deviceId": "device-026",
+      "createdAt": "2025-10-08T18:31:00Z",
+      "lat": 50.0898,
+      "lon": 19.9598,
+      "distance": 26
+    },
+    {
+      "id": "A027",
+      "status": "resolved",
+      "deviceId": "device-027",
+      "createdAt": "2025-10-08T18:32:00Z",
+      "lat": 50.0902,
+      "lon": 19.9602,
+      "distance": 26
+    },
+    {
+      "id": "A028",
+      "status": "new",
+      "deviceId": "device-028",
+      "createdAt": "2025-10-08T18:35:00Z",
+      "lat": 50.0355,
+      "lon": 19.9455,
+      "distance": 66
+    },
+    {
+      "id": "A029",
+      "status": "resolved",
+      "deviceId": "device-029",
+      "createdAt": "2025-10-08T18:36:00Z",
+      "lat": 50.0348,
+      "lon": 19.9448,
+      "distance": 26
+    },
+    {
+      "id": "A030",
+      "status": "new",
+      "deviceId": "device-030",
+      "createdAt": "2025-10-08T18:37:00Z",
+      "lat": 50.0352,
+      "lon": 19.9452,
+      "distance": 26
     }
   ],
-
   "sensors": [
     {
       "deviceId": "device-001",
-      "firstSeen": "2025-11-17T12:00:00Z",
-      "lastSeen": "2025-11-17T12:10:00Z",
-      "lat": 50.0614,
-      "lon": 19.9383
+      "firstSeen": "2025-10-08T16:30:00Z",
+      "lastSeen": "2025-10-08T17:35:00Z",
+      "lat": 50.0712,
+      "lon": 19.9314
     },
     {
       "deviceId": "device-002",
-      "firstSeen": "2025-11-16T09:30:00Z",
-      "lastSeen": "2025-11-17T11:45:00Z",
-      "lat": 50.0625,
-      "lon": 19.9370
+      "firstSeen": "2025-10-08T16:45:00Z",
+      "lastSeen": "2025-10-08T17:36:00Z",
+      "lat": 50.0628,
+      "lon": 19.9402
     },
     {
       "deviceId": "device-003",
-      "firstSeen": "2025-11-16T09:40:00Z",
-      "lastSeen": "2025-11-17T11:50:00Z",
-      "lat": 50.0608,
-      "lon": 19.9395
+      "firstSeen": "2025-10-08T16:50:00Z",
+      "lastSeen": "2025-10-08T17:37:00Z",
+      "lat": 50.0602,
+      "lon": 19.9315
     },
     {
       "deviceId": "device-004",
-      "firstSeen": "2025-11-16T10:00:00Z",
-      "lastSeen": "2025-11-17T12:30:00Z",
-      "lat": 50.0668,
-      "lon": 19.9302
+      "firstSeen": "2025-10-08T17:00:00Z",
+      "lastSeen": "2025-10-08T17:45:00Z",
+      "lat": 50.0670,
+      "lon": 19.9345
     },
     {
       "deviceId": "device-005",
-      "firstSeen": "2025-11-16T10:10:00Z",
-      "lastSeen": "2025-11-17T12:31:00Z",
-      "lat": 50.0672,
-      "lon": 19.9290
+      "firstSeen": "2025-10-08T17:05:00Z",
+      "lastSeen": "2025-10-08T17:46:00Z",
+      "lat": 50.0635,
+      "lon": 19.9333
     },
     {
       "deviceId": "device-006",
-      "firstSeen": "2025-11-16T10:20:00Z",
-      "lastSeen": "2025-11-17T12:32:00Z",
-      "lat": 50.0660,
-      "lon": 19.9315
+      "firstSeen": "2025-10-08T17:10:00Z",
+      "lastSeen": "2025-10-08T17:47:00Z",
+      "lat": 50.0655,
+      "lon": 19.9365
+    },
+    {
+      "deviceId": "device-007",
+      "firstSeen": "2025-10-08T17:20:00Z",
+      "lastSeen": "2025-10-08T18:00:00Z",
+      "lat": 50.0680,
+      "lon": 19.9350
+    },
+    {
+      "deviceId": "device-008",
+      "firstSeen": "2025-10-08T17:22:00Z",
+      "lastSeen": "2025-10-08T18:01:00Z",
+      "lat": 50.0685,
+      "lon": 19.9355
+    },
+    {
+      "deviceId": "device-009",
+      "firstSeen": "2025-10-08T17:25:00Z",
+      "lastSeen": "2025-10-08T18:02:00Z",
+      "lat": 50.0675,
+      "lon": 19.9340
+    },
+    {
+      "deviceId": "device-010",
+      "firstSeen": "2025-10-08T17:30:00Z",
+      "lastSeen": "2025-10-08T18:05:00Z",
+      "lat": 50.0735,
+      "lon": 19.9230
+    },
+    {
+      "deviceId": "device-011",
+      "firstSeen": "2025-10-08T17:31:00Z",
+      "lastSeen": "2025-10-08T18:06:00Z",
+      "lat": 50.0728,
+      "lon": 19.9220
+    },
+    {
+      "deviceId": "device-012",
+      "firstSeen": "2025-10-08T17:32:00Z",
+      "lastSeen": "2025-10-08T18:07:00Z",
+      "lat": 50.0733,
+      "lon": 19.9228
+    },
+    {
+      "deviceId": "device-013",
+      "firstSeen": "2025-10-08T17:35:00Z",
+      "lastSeen": "2025-10-08T18:10:00Z",
+      "lat": 50.0805,
+      "lon": 19.9205
+    },
+    {
+      "deviceId": "device-014",
+      "firstSeen": "2025-10-08T17:36:00Z",
+      "lastSeen": "2025-10-08T18:11:00Z",
+      "lat": 50.0798,
+      "lon": 19.9198
+    },
+    {
+      "deviceId": "device-015",
+      "firstSeen": "2025-10-08T17:37:00Z",
+      "lastSeen": "2025-10-08T18:12:00Z",
+      "lat": 50.0803,
+      "lon": 19.9203
+    },
+    {
+      "deviceId": "device-016",
+      "firstSeen": "2025-10-08T17:40:00Z",
+      "lastSeen": "2025-10-08T18:15:00Z",
+      "lat": 50.0855,
+      "lon": 19.9255
+    },
+    {
+      "deviceId": "device-017",
+      "firstSeen": "2025-10-08T17:41:00Z",
+      "lastSeen": "2025-10-08T18:16:00Z",
+      "lat": 50.0848,
+      "lon": 19.9248
+    },
+    {
+      "deviceId": "device-018",
+      "firstSeen": "2025-10-08T17:42:00Z",
+      "lastSeen": "2025-10-08T18:17:00Z",
+      "lat": 50.0852,
+      "lon": 19.9252
+    },
+    {
+      "deviceId": "device-019",
+      "firstSeen": "2025-10-08T17:45:00Z",
+      "lastSeen": "2025-10-08T18:20:00Z",
+      "lat": 50.0555,
+      "lon": 19.9505
+    },
+    {
+      "deviceId": "device-020",
+      "firstSeen": "2025-10-08T17:46:00Z",
+      "lastSeen": "2025-10-08T18:21:00Z",
+      "lat": 50.0548,
+      "lon": 19.9498
+    },
+    {
+      "deviceId": "device-021",
+      "firstSeen": "2025-10-08T17:47:00Z",
+      "lastSeen": "2025-10-08T18:22:00Z",
+      "lat": 50.0552,
+      "lon": 19.9502
+    },
+    {
+      "deviceId": "device-022",
+      "firstSeen": "2025-10-08T17:50:00Z",
+      "lastSeen": "2025-10-08T18:25:00Z",
+      "lat": 50.0405,
+      "lon": 19.9105
+    },
+    {
+      "deviceId": "device-023",
+      "firstSeen": "2025-10-08T17:51:00Z",
+      "lastSeen": "2025-10-08T18:26:00Z",
+      "lat": 50.0398,
+      "lon": 19.9098
+    },
+    {
+      "deviceId": "device-024",
+      "firstSeen": "2025-10-08T17:52:00Z",
+      "lastSeen": "2025-10-08T18:27:00Z",
+      "lat": 50.0402,
+      "lon": 19.9102
+    },
+    {
+      "deviceId": "device-025",
+      "firstSeen": "2025-10-08T17:55:00Z",
+      "lastSeen": "2025-10-08T18:30:00Z",
+      "lat": 50.0905,
+      "lon": 19.9605
+    },
+    {
+      "deviceId": "device-026",
+      "firstSeen": "2025-10-08T17:56:00Z",
+      "lastSeen": "2025-10-08T18:31:00Z",
+      "lat": 50.0898,
+      "lon": 19.9598
+    },
+    {
+      "deviceId": "device-027",
+      "firstSeen": "2025-10-08T17:57:00Z",
+      "lastSeen": "2025-10-08T18:32:00Z",
+      "lat": 50.0902,
+      "lon": 19.9602
+    },
+    {
+      "deviceId": "device-028",
+      "firstSeen": "2025-10-08T18:00:00Z",
+      "lastSeen": "2025-10-08T18:35:00Z",
+      "lat": 50.0355,
+      "lon": 19.9455
+    },
+    {
+      "deviceId": "device-029",
+      "firstSeen": "2025-10-08T18:01:00Z",
+      "lastSeen": "2025-10-08T18:36:00Z",
+      "lat": 50.0348,
+      "lon": 19.9448
+    },
+    {
+      "deviceId": "device-030",
+      "firstSeen": "2025-10-08T18:02:00Z",
+      "lastSeen": "2025-10-08T18:37:00Z",
+      "lat": 50.0352,
+      "lon": 19.9452
     }
   ]
 }

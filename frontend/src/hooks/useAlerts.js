@@ -1,4 +1,3 @@
-// src/hooks/useAlerts.js
 import { useEffect, useState } from "react";
 
 const API = import.meta.env.VITE_API_BASE_URL || "";
@@ -25,15 +24,19 @@ export function useAlerts(intervalMs = 10000) {
 
         if (!alive) return;
 
+
         const normalized = (json || []).map((a, idx) => ({
           id: a.id || `A${String(idx + 1).padStart(3, "0")}`,
           status: a.status,
-          devices: a.devices || [],
           createdAt: a.createdAt,
+          deviceId: a.deviceId, 
+          lat: a.lat ? Number(a.lat) : null,
+          lon: a.lon ? Number(a.lon) : null,
+          distance: a.distance ? Number(a.distance) : null,
+          devices: a.devices || (a.deviceId ? [a.deviceId] : []),
         }));
 
         console.log("Normalized alerts:", normalized);
-
         setAlerts(normalized);
       } catch (e) {
         console.error("Error fetching alerts:", e);

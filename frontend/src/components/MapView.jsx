@@ -1,134 +1,164 @@
-// src/components/MapView.jsx
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
-  Popup,
   Circle,
-  CircleMarker,   // 🆕 small point in the center of the circle
+  Polyline,
+  Popup,
+  Tooltip,
   ZoomControl,
+  useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import "../leaflet_fix";
 import SearchBox from "./SearchBox";
 
-const colorNew = "#ef4444"; // red for active sources
+const getColorByDistance = (dist) => {
+  if (dist <= 200) return "#84cc16";  
+  if (dist <= 400) return "#eab308";  
+  return "#ef4444";                   
+};
 
-function sensorIcon(name) {
+const createSensorIcon = () => {
   const html = `
-    <div class="sensor-wrap" style="text-align:center; pointer-events:auto;">
-      <div style="
-        width:20px;height:20px;
-        border:3px solid #111111;
-        border-radius:50%;
-        background:white;
-        margin:auto;
-        box-shadow:0 0 0 2px #fff, 0 0 0 4px #111;
-      "></div>
-      <div style="
-        background:#ffffff;
-        color:#111111;
-        font-size:12px;font-weight:800;
-        padding:3px 8px;border-radius:8px;margin-top:4px;
-        border:2px solid #111111;
-        box-shadow:0 1px 2px rgba(0,0,0,.25);
-      ">
-        ${name}
-      </div>
+    <div style="
+      width: 12px; height: 12px; background-color: white;
+      border: 2px solid #333; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    "></div>`;
+  return L.divIcon({ html, className: "bg-transparent", iconSize: [12, 12], iconAnchor: [6, 6] });
+};
+
+const createPulsingSourceIcon = (status) => {
+  const isNew = status === 'new';
+  const colorClass = isNew ? 'red-600' : 'gray-500';
+  const pulse = isNew ? `<div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-50"></div>` : '';
+
+  const html = `
+    <div class="relative flex items-center justify-center w-8 h-8">
+      <div class="absolute w-full h-0.5 bg-${colorClass}"></div>
+      <div class="absolute h-full w-0.5 bg-${colorClass}"></div>
+      <div class="absolute w-6 h-6 border-2 border-${colorClass} rounded-full bg-white/20 z-10"></div>
+      ${pulse}
     </div>`;
-  return L.divIcon({
-    html,
-    className: "",
-    iconSize: [80, 68],
-    iconAnchor: [40, 34],
-    popupAnchor: [0, -28],
-  });
+  return L.divIcon({ html, className: "bg-transparent", iconSize: [32, 32], iconAnchor: [16, 16] });
+};
+
+function MapFlyTo({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) map.flyTo(position, 16, { duration: 1.5 });
+  }, [position, map]);
+  return null;
 }
 
 export default function MapView({
-  sources = [], // only new
+  sources = [],
   sensors = [],
   mapRef,
   loading = false,
+  onAlertSelect,
 }) {
-  const markersRef = useRef({});
-  const sourceRefs = useRef({}); // references for circles (alerts)
   const [base, setBase] = useState("topo");
-  const [showSources, setShowSources] = useState(true);
+  const [showCircles, setShowCircles] = useState(true);
   const [showSensors, setShowSensors] = useState(true);
+  const [showTriangulation, setShowTriangulation] = useState(true);
+  
+  const [selectedAlertId, setSelectedAlertId] = useState("");
 
-  const summary = useMemo(
-    () => ({
-      sources: sources.length,
-      sensors: sensors.length,
-    }),
-    [sources, sensors]
-  );
+  const sensorsMap = useMemo(() => {
+    const map = {};
+    sensors.forEach((s) => (map[s.id] = s));
+    return map;
+  }, [sensors]);
+
+  const displayedSources = useMemo(() => {
+    if (!selectedAlertId) return sources;
+    return sources.filter(s => s.id === selectedAlertId);
+  }, [sources, selectedAlertId]);
+
+  const visibleSensorIds = useMemo(() => {
+    if (!selectedAlertId) return null; 
+    const ids = new Set();
+    displayedSources.forEach(src => src.devices.forEach(d => ids.add(d)));
+    return ids;
+  }, [displayedSources, selectedAlertId]);
+
+  const flyPosition = useMemo(() => {
+    if (!selectedAlertId || displayedSources.length === 0) return null;
+    const target = displayedSources[0];
+    if (target.lat && target.lon) return [target.lat, target.lon];
+    return null;
+  }, [selectedAlertId, displayedSources]);
 
   return (
-    <div className="relative card overflow-hidden">
+    <div className="relative card overflow-hidden border-0 p-0 shadow-xl h-[700px]">
+      
       <SearchBox
         sensors={sensors}
         sources={sources}
-        onSelect={(pos, item) => {
-          mapRef?.current?.flyTo(pos, item?.type === "sensor" ? 16 : 13);
-
-          if (item?.type === "sensor" && item.id) {
-            setTimeout(() => markersRef.current[item.id]?.openPopup(), 250);
-          }
-
-          if (item?.type === "alert" && item.id) {
-            setTimeout(() => sourceRefs.current[item.id]?.openPopup(), 250);
-          }
-        }}
+        onSelect={(pos) => mapRef?.current?.flyTo(pos, 15)}
       />
 
-      {/* Base map switchers */}
-      <div className="absolute z-[500] left-6 bottom-6 flex gap-2">
-        <button
-          title="Topographic"
-          onClick={() => setBase("topo")}
-          className={`w-10 h-10 rounded-full border shadow bg-white grid place-items-center text-lg ${
-            base === "topo" ? "ring-2 ring-zinc-300" : "hover:bg-zinc-50"
-          }`}
+
+      <div className="absolute z-[500] right-6 top-6">
+        <div className="bg-white/95 backdrop-blur shadow-md border border-zinc-300 rounded-lg px-3 py-2 flex items-center gap-2">
+           <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Focus:</span>
+           <select 
+             className="bg-transparent font-bold text-sm outline-none cursor-pointer max-w-[140px]"
+             value={selectedAlertId}
+             onChange={(e) => setSelectedAlertId(e.target.value)}
+           >
+             <option value="">-- Show All ({sources.length}) --</option>
+             {sources.map(s => (
+               <option key={s.id} value={s.id}>
+                 Alert {s.id}
+               </option>
+             ))}
+           </select>
+           {selectedAlertId && (
+             <button 
+               onClick={() => setSelectedAlertId("")}
+               className="ml-1 text-xs bg-zinc-100 hover:bg-zinc-200 border rounded px-1.5 py-0.5 font-bold text-zinc-600"
+               title="Clear filter"
+             >✕</button>
+           )}
+        </div>
+      </div>
+
+      <div className="absolute z-[500] right-4 top-16 mt-2">
+        <div className="bg-white/95 backdrop-blur border border-zinc-300 rounded-lg shadow-md p-3 text-xs space-y-2 select-none w-[140px]">
+           <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={showCircles} onChange={e => setShowCircles(e.target.checked)} className="accent-blue-600"/>
+            <span className="font-semibold">Signal Zones</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={showSensors} onChange={e => setShowSensors(e.target.checked)} className="accent-blue-600"/>
+            <span className="font-semibold">Sensors</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={showTriangulation} onChange={e => setShowTriangulation(e.target.checked)} className="accent-blue-600"/>
+            <span className="font-semibold">Triangulation</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="absolute z-[500] left-4 bottom-8 flex flex-col gap-2">
+        <button 
+          onClick={() => setBase("topo")} 
+          className={`w-10 h-10 rounded shadow grid place-items-center text-xl transition-transform hover:scale-105 ${base === "topo" ? "bg-zinc-800 text-white" : "bg-white"}`}
+          title="Mapa drogowa"
         >
           🗺️
         </button>
-        <button
-          title="Satellite"
-          onClick={() => setBase("sat")}
-          className={`w-10 h-10 rounded-full border shadow bg-white grid place-items-center text-lg ${
-            base === "sat" ? "ring-2 ring-zinc-300" : "hover:bg-zinc-50"
-          }`}
+        <button 
+          onClick={() => setBase("sat")} 
+          className={`w-10 h-10 rounded shadow grid place-items-center text-xl transition-transform hover:scale-105 ${base === "sat" ? "bg-zinc-800 text-white" : "bg-white"}`}
+          title="Satelita"
         >
           🛰️
         </button>
-      </div>
-
-      {/* Overlay */}
-      <div className="absolute z-[500] right-6 top-[88px]">
-        <div className="bg-white/95 backdrop-blur border rounded-[12px] shadow px-2 py-1.5 text-[12px] space-y-1">
-          <div className="text-xs text-zinc-500">
-            devices: {summary.sensors}, alerts: {summary.sources}
-          </div>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showSources}
-              onChange={(e) => setShowSources(e.target.checked)}
-            />
-            Sources
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showSensors}
-              onChange={(e) => setShowSensors(e.target.checked)}
-            />
-            Sensors
-          </label>
-        </div>
       </div>
 
       <MapContainer
@@ -136,111 +166,119 @@ export default function MapView({
         center={[50.0614, 19.9383]}
         zoom={14}
         zoomControl={false}
-        className="w-full h-[700px] rounded-[24px]"
+        className="w-full h-full bg-[#eef0f2]"
       >
-        <ZoomControl position="topright" />
+        <ZoomControl position="bottomright" />
+        
+        <MapFlyTo position={flyPosition} />
 
         {base === "topo" ? (
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+          <TileLayer opacity={0.7} attribution='&copy; OSM' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         ) : (
-          <TileLayer
-            attribution="Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics"
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          />
+          <TileLayer attribution="Esri" url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
         )}
 
-        {/* ALERTS – only new */}
-        {showSources &&
-          sources.map((src) => (
-            <Circle
-              key={src.id}
-              center={[src.lat, src.lon]}
-              radius={300}
-              pathOptions={{
-                color: colorNew,
-                weight: 3,
-                opacity: 0.9,
-                fillColor: colorNew,
-                fillOpacity: 0.25,
-              }}
-              ref={(el) => {
-                if (el) sourceRefs.current[src.id] = el;
-              }}
-            >
-              <Popup autoPan keepInView>
-                <div className="space-y-1 text-sm">
-                  <div className="font-semibold">{src.id}</div>
-                  <div>Status: {src.status}</div>
-                  {src.createdAt && <div>Time: {src.createdAt}</div>}
-                  <div>
-                    Lat/Lon: {src.lat.toFixed(4)}, {src.lon.toFixed(4)}
-                  </div>
-                  {src.devices?.length > 0 && (
-                    <div>
-                      Sensors:{" "}
-                      <span className="font-mono text-xs">
-                        {src.devices.join(", ")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </Popup>
-            </Circle>
-          ))}
+        {showCircles && displayedSources.map((src) => (
+            src.rawAlerts.map((alert, idx) => {
+                let lat = alert.lat;
+                let lon = alert.lon;
+                if ((!lat || !lon) && alert.deviceId) {
+                    const sensor = sensorsMap[alert.deviceId];
+                    if (sensor) { lat = sensor.lat; lon = sensor.lon; }
+                }
 
-        {/* 🆕 TRIANGULATION POINT IN THE CENTER OF THE CIRCLE */}
-        {showSources &&
-          sources.map((src) => (
-            <CircleMarker
-              key={src.id + "-center"}
-              center={[src.lat, src.lon]}
-              radius={5}
-              pathOptions={{
-                color: "#b91c1c",     // darker red border
-                weight: 2,
-                fillColor: "#ffffff", // white fill
-                fillOpacity: 1,
-              }}
-            />
-          ))}
+                const dist = alert.distance;
+                if (!lat || !lon) return null;
+                const color = getColorByDistance(dist);
 
-        {/* SENSORS */}
-        {showSensors &&
-          sensors.map((s) => (
-            <Marker
-              key={s.id}
-              position={[s.lat, s.lon]}
-              icon={sensorIcon(s.id)}
-              riseOnHover
-              zIndexOffset={1000}
-              ref={(el) => {
-                if (el) markersRef.current[s.id] = el;
-              }}
-            >
-              <Popup autoPan keepInView>
-                <div className="space-y-1 text-sm">
-                  <div className="font-semibold">Sensor {s.id}</div>
-                  <div>
-                    Lat/Lon: {s.lat.toFixed(4)}, {s.lon.toFixed(4)}
-                  </div>
-                  {s.firstSeen && <div>First seen: {s.firstSeen}</div>}
-                  {s.lastSeen && <div>Last seen: {s.lastSeen}</div>}
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+                return (
+                    <Circle
+                        key={`circle-${src.id}-${alert.deviceId}-${idx}`}
+                        center={[lat, lon]}
+                        radius={dist} 
+                        pathOptions={{
+                            color: color,
+                            weight: 2,
+                            fillColor: color,
+                            fillOpacity: 0.15,
+                        }}
+                        interactive={false}
+                    />
+                );
+            })
+        ))}
+
+        {showTriangulation && displayedSources.map((src) => {
+            if (src.status !== 'new') return null;
+            return src.rawAlerts.map((alert, idx) => {
+                let sLat = alert.lat;
+                let sLon = alert.lon;
+                if ((!sLat || !sLon) && alert.deviceId) {
+                    const sensor = sensorsMap[alert.deviceId];
+                    if (sensor) { sLat = sensor.lat; sLon = sensor.lon; }
+                }
+                if (!sLat || !sLon || !src.lat || !src.lon) return null;
+                
+                return (
+                    <Polyline
+                        key={`line-${src.id}-${idx}`}
+                        positions={[[src.lat, src.lon], [sLat, sLon]]}
+                        pathOptions={{
+                            color: getColorByDistance(alert.distance),
+                            weight: 1,
+                            dashArray: '5, 5',
+                            opacity: 0.8
+                        }}
+                    />
+                );
+            });
+        })}
+
+        {showSensors && sensors.map((s) => {
+            if (visibleSensorIds && !visibleSensorIds.has(s.id)) {
+                return null;
+            }
+            return (
+                <Marker 
+                    key={`sensor-${s.id}`} 
+                    position={[s.lat, s.lon]} 
+                    icon={createSensorIcon()} 
+                    zIndexOffset={500}
+                >
+                  <Tooltip direction="top" offset={[0, -5]} opacity={0.9}>
+                    <span className="font-mono font-bold text-xs">{s.id}</span>
+                  </Tooltip>
+                  <Popup>
+                      <div className="text-sm font-mono space-y-1">
+                        <strong className="block border-b pb-1 mb-1">{s.id}</strong>
+                        <div>Lat: {s.lat.toFixed(4)}</div>
+                        <div>Lon: {s.lon.toFixed(4)}</div>
+                        <div className="text-zinc-500 text-xs mt-1 pt-1 border-t">
+                           TS: {s.lastSeen?.replace('T', ' ').replace('Z', '')}
+                        </div>
+                      </div>
+                  </Popup>
+                </Marker>
+            );
+        })}
+
+        {showTriangulation && displayedSources.map((src) => {
+             if (!src.lat || !src.lon) return null;
+             return (
+                <Marker
+                    key={`target-${src.id}`}
+                    position={[src.lat, src.lon]}
+                    icon={createPulsingSourceIcon(src.status)} 
+                    zIndexOffset={1000}
+                    eventHandlers={{ click: () => onAlertSelect?.(src) }}
+                >
+                   <Tooltip direction="top" offset={[0, -10]}>
+                      Target: <strong>{src.id}</strong>
+                   </Tooltip>
+                </Marker>
+            )
+        })}
       </MapContainer>
-
-      {loading && (
-        <div className="absolute inset-0 grid place-items-center pointer-events-none">
-          <div className="bg-white/80 px-4 py-2 rounded-xl border shadow">
-            loading map…
-          </div>
-        </div>
-      )}
     </div>
   );
 }

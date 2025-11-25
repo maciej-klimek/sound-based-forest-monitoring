@@ -1,4 +1,3 @@
-// src/components/AlertsList.jsx
 import { useEffect, useState } from "react";
 
 export default function AlertsList({ sensors: sensorsProp, onSelect }) {

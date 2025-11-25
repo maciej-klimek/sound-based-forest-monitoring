@@ -1,4 +1,3 @@
-// src/layouts/AppLayout.jsx
 import { NavLink, Outlet } from "react-router-dom";
 
 const pill =
@@ -10,7 +9,6 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-zinc-200/60">
       <header className="px-8 py-5">
-        {/* only right toggle, without 'LAS' text */}
         <div className="max-w-7xl mx-auto flex items-center justify-end">
           <nav className="flex gap-3">
             <NavLink

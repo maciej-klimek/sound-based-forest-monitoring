@@ -1,4 +1,3 @@
-// src/hooks/useSensors.js
 import { useEffect, useState } from "react";
 
 const API = import.meta.env.VITE_API_BASE_URL || "";
