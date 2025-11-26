@@ -6,6 +6,7 @@ from datetime import datetime
 
 # --- Configuration ---
 BASE_URL = "https://i18wwdizmk.execute-api.eu-north-1.amazonaws.com"
+
 DEVICE_IDENTITY_FILE = "device_identity.json" # File to store the device's identity (ID and secret)
 
 # --- Communication Functions ---

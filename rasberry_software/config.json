@@ -1,0 +1,13 @@
+{
+  "latitude": 52.2297,
+  "longitude": 21.0122,
+  "sensor_pin": 17,
+  "sample_rate": 48000,
+  "channels": 2,
+  "recording_duration": 10,
+  "recordings_dir": "recordings",
+  "audio_device": null,
+  "chainsaw_threshold": 1000,
+  "bandpass_low": 500,
+  "bandpass_high": 8000
+}

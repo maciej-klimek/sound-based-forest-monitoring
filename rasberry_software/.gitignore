@@ -14,9 +14,18 @@ ENV/
 # Device identity (contains secrets)
 device_identity.json
 
+# Recordings directory
+recordings/
+*.wav
+!tests/test_file/*.wav
+
 # Logs
 *.log
 logs/
+
+# Temporary files
+tmp.wav
+analysis.png
 
 # IDE
 .vscode/
