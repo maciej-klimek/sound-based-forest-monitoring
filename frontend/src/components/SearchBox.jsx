@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { shortId } from "../utils/format";
 
 const debounce = (fn, ms = 300) => {
   let t;
@@ -23,7 +24,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
       .map((x) => ({
         type: "sensor",
         id: x.id,
-        label: x.id,
+        label: shortId(x.id),
         lat: x.lat,
         lon: x.lon,
       }));
@@ -38,7 +39,7 @@ export default function SearchBox({ sensors = [], sources = [], onSelect }) {
       .map((x) => ({
         type: "alert",
         id: x.id,
-        label: `Alert ${x.id}`,
+        label: `Alert ${shortId(x.id)}`,
         lat: x.lat,
         lon: x.lon,
       }));

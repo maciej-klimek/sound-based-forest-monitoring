@@ -1,86 +1,138 @@
+// src/hooks/useSources.js
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL || "";
+function normalizeSources(json) {
+  if (!json) return [];
 
-export function useSources(intervalMs = 10000) {
+  let rawSources;
+  if (Array.isArray(json)) {
+    rawSources = json;
+  } else if (Array.isArray(json.sources)) {
+    rawSources = json.sources;
+  } else if (Array.isArray(json.alerts)) {
+    rawSources = [json];
+  } else {
+    rawSources = [];
+  }
+
+  return rawSources.map((src, idx) => {
+    const alertsIn = Array.isArray(src.alerts)
+      ? src.alerts
+      : Array.isArray(src.rawAlerts)
+      ? src.rawAlerts
+      : [];
+
+    // deduplikacja alertów w obrębie jednego source
+    const seen = new Set();
+    const rawAlerts = [];
+
+    for (let j = 0; j < alertsIn.length; j++) {
+      const a = alertsIn[j] || {};
+      const key = [
+        a.deviceId || "",
+        a.s3Key || "",
+        a.ts || a.createdAt || "",
+        a.checksum || "",
+      ].join("|");
+
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const baseStatus = (a.status || src.status || "NEW").toLowerCase();
+
+      rawAlerts.push({
+        id: a.id || `alert-${idx}-${j}`,
+        deviceId: a.deviceId,
+        lat: a.lat != null ? Number(a.lat) : null,
+        lon: a.lon != null ? Number(a.lon) : null,
+        distance: a.distance != null ? Number(a.distance) : null,
+        status: baseStatus,
+        ts: a.ts || a.createdAt,
+        createdAt: a.createdAt || a.ts,
+        checksum: a.checksum,
+        s3Key: a.s3Key || a.audioUrl,
+        audioUrl: a.audioUrl || a.s3Key,
+      });
+    }
+
+    const first = rawAlerts[0] || alertsIn[0] || src || {};
+
+    const devices =
+      src.devices ||
+      Array.from(new Set(rawAlerts.map((a) => a.deviceId).filter(Boolean)));
+
+    const status = (src.status || first.status || "NEW").toLowerCase();
+
+    // 👇 id będzie zawsze unikalne: checksum + indeks, albo fallback src-idx
+    const baseId =
+      src.id ||
+      src.sourceId ||
+      first.checksum ||
+      first.ts ||
+      `src-${idx}`;
+    const id = `${baseId}-${idx}`;
+
+    return {
+      id,
+      lat:
+        src.lat != null
+          ? Number(src.lat)
+          : first.lat != null
+          ? Number(first.lat)
+          : null,
+      lon:
+        src.lon != null
+          ? Number(src.lon)
+          : first.lon != null
+          ? Number(first.lon)
+          : null,
+      status,
+      createdAt: src.createdAt || first.createdAt || first.ts,
+      devices,
+      rawAlerts,
+    };
+  });
+}
+
+export function useSources(pollMs = 10000) {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let alive = true;
-    let timer;
+    let cancelled = false;
 
-    const fetchOnce = async () => {
+    async function load() {
       try {
         setLoading(true);
-        setError(null);
-
-        const res = await fetch(`${API}/sources`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch("/api/sources");
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
         const json = await res.json();
+        if (cancelled) return;
 
-        if (!alive) return;
-
-        const rawSources = Array.isArray(json) 
-          ? json 
-          : (Array.isArray(json?.sources) ? json.sources : []);
-
-        const normalized = rawSources.map((src, idx) => {
-          const alerts = Array.isArray(src.alerts) ? src.alerts : [];
-          
-          const hasNew = alerts.some((a) => a.status === "new");
-          const status = hasNew ? "new" : "resolved";
-
-          const devices = [
-            ...new Set(alerts.map((a) => a.deviceId).filter(Boolean)),
-          ];
-
-          const createdAt = alerts
-            .map((a) => a.createdAt || a.ts)
-            .filter(Boolean)
-            .sort()[0] || null;
-
-          const cleanAlerts = alerts.map(a => ({
-            ...a,
-            lat: Number(a.lat),
-            lon: Number(a.lon),
-            distance: Number(a.distance) || 0
-          }));
-
-
-          let displayId = src.id || `S${String(idx + 1).padStart(3, '0')}`;
-          displayId = displayId.replace('S', 'A'); 
-
-          return {
-            id: displayId, 
-            originalId: src.id,
-            lat: Number(src.lat),
-            lon: Number(src.lon),
-            status,
-            devices,      
-            createdAt,
-            rawAlerts: cleanAlerts,
-          };
-        });
-        
+        const normalized = normalizeSources(json);
         setSources(normalized);
+        setError(null);
       } catch (e) {
-        console.error(e);
-        if (alive) setError(e.message || "Błąd danych");
+        if (cancelled) return;
+        console.error("useSources error:", e);
+        setError(e.message || "Failed to fetch sources");
+        setSources([]);
       } finally {
-        if (alive) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
+    }
 
-    fetchOnce();
-    if (intervalMs > 0) timer = setInterval(fetchOnce, intervalMs);
+    load();
+    const id = setInterval(load, pollMs);
 
     return () => {
-      alive = false;
-      if (timer) clearInterval(timer);
+      cancelled = true;
+      clearInterval(id);
     };
-  }, [intervalMs]);
+  }, [pollMs]);
 
   return { sources, loading, error };
 }

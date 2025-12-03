@@ -1,51 +1,70 @@
+// src/hooks/useSensors.js
 import { useEffect, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL || "";
+/**
+ * Normalizacja odpowiedzi /api/sensors
+ * Oczekiwane kształty:
+ *   [{ ... }, ...]
+ *   lub { sensors: [{ ... }], count: n }
+ */
+function normalizeSensors(json) {
+  const list = Array.isArray(json) ? json : json?.sensors || [];
 
-export function useSensors(intervalMs = 10000) {
+  return list.map((s, idx) => ({
+    id: s.id || s.deviceId || `sensor-${idx}`,
+    lat: s.lat != null ? Number(s.lat) : null,
+    lon: s.lon != null ? Number(s.lon) : null,
+    firstSeen: s.firstSeen,
+    lastSeen: s.lastSeen,
+    // opcjonalnie – jeśli backend zwraca "score"
+    score: typeof s.score === "number" ? s.score : undefined,
+  }));
+}
+
+/**
+ * useSensors(pollMs)
+ *  - polluje /api/sensors co pollMs ms
+ *  - zwraca: { sensors, loading, error }
+ */
+export function useSensors(pollMs = 10000) {
   const [sensors, setSensors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let alive = true;
-    let timer;
+    let cancelled = false;
 
-    const fetchOnce = async () => {
+    async function load() {
       try {
         setLoading(true);
-        setError(null);
-
-        const res = await fetch(`${API}/sensors`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch("/api/sensors");
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
         const json = await res.json();
+        if (cancelled) return;
 
-        if (!alive) return;
-
-        const normalized = (json || []).map((s) => ({
-          id: s.deviceId,
-          lat: Number(s.lat),
-          lon: Number(s.lon),
-          firstSeen: s.firstSeen,
-          lastSeen: s.lastSeen,
-        }));
-
+        const normalized = normalizeSensors(json);
         setSensors(normalized);
+        setError(null);
       } catch (e) {
-        if (alive) setError(e.message || "Błąd pobierania czujników");
+        if (cancelled) return;
+        console.error("useSensors error:", e);
+        setError(e.message || "Failed to fetch sensors");
+        setSensors([]);
       } finally {
-        if (alive) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
+    }
 
-    fetchOnce();
-    if (intervalMs > 0) timer = setInterval(fetchOnce, intervalMs);
+    load();
+    const id = setInterval(load, pollMs);
 
     return () => {
-      alive = false;
-      if (timer) clearInterval(timer);
+      cancelled = true;
+      clearInterval(id);
     };
-  }, [intervalMs]);
+  }, [pollMs]);
 
   return { sensors, loading, error };
 }

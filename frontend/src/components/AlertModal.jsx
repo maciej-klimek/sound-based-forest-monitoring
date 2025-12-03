@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { shortId } from "../utils/format";
 
 export default function AlertModal({ open, alert, onClose, onFly }) {
   useEffect(() => {
@@ -36,7 +37,10 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
             <div>
               <h2 className="text-xl font-black text-zinc-800 flex items-center gap-2">
                 <span>⚠️ THREAT DETECTED</span>
-                <span className="bg-zinc-200 text-zinc-600 text-sm px-2 py-0.5 rounded font-mono font-normal">#{id}</span>
+                <span className="bg-zinc-200 text-zinc-600 text-sm px-2 py-0.5 rounded font-mono font-normal"  
+                  title={id}>
+                  #{shortId(id)}
+                </span>
               </h2>
               <div className="mt-1 text-sm text-zinc-500 flex gap-3">
                 <span className={`uppercase font-bold text-xs px-2 py-0.5 rounded ${status === 'new' ? 'bg-rose-100 text-rose-700' : 'bg-green-100 text-green-700'}`}>
@@ -84,8 +88,9 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                 <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Participating Sensors</div>
                 <div className="flex flex-wrap gap-2">
                     {devices.map(d => (
-                        <span key={d} className="px-2 py-1 bg-zinc-100 border rounded text-xs font-mono text-zinc-600">
-                            {d.replace('device-', 'dev-')}
+                        <span key={d} className="px-2 py-1 bg-zinc-100 border rounded text-xs font-mono text-zinc-600"
+                          title={d}>
+                            dev-{shortId(d.replace("device-", ""), 5)}
                         </span>
                     ))}
                 </div>
@@ -113,8 +118,9 @@ export default function AlertModal({ open, alert, onClose, onFly }) {
                                 {/* Info o nagraniu */}
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-mono text-xs font-bold bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700">
-                                        {ev.deviceId}
+                                      <span className="font-mono text-xs font-bold bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700" 
+                                      title={ev.deviceId}>
+                                          {shortId(ev.deviceId ? ev.deviceId.replace("device-", "") : ev.deviceId,5)}
                                       </span>
                                       {dist > 0 && (
                                         <span className="text-[10px] font-mono text-zinc-500 border border-zinc-200 px-1 rounded">

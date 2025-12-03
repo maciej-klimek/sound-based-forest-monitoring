@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { shortId } from "../utils/format";
+
 
 export default function HistoryList({ items = [], onShow }) {
   const [q, setQ] = useState("");       
@@ -112,8 +114,11 @@ export default function HistoryList({ items = [], onShow }) {
               ${item.status === 'new' ? 'bg-rose-50/50 hover:bg-rose-100/50 border-rose-100' : 'bg-white hover:bg-zinc-50 border-zinc-200'}
             `}
           >
-            <div className="font-mono font-bold text-lg text-zinc-700 group-hover:text-black transition">
-              {item.id}
+            <div
+              className="font-mono font-bold text-lg text-zinc-700 group-hover:text-black transition"
+              title={item.id}
+            >
+              {shortId(item.id)}
             </div>
 
             <div className="text-xs text-zinc-600 font-medium">
@@ -121,10 +126,14 @@ export default function HistoryList({ items = [], onShow }) {
             </div>
 
             <div className="flex flex-wrap gap-1">
-               {item.devices.length > 0 ? item.devices.map(dev => (
-                 <span key={dev} className="text-[10px] font-mono bg-white border border-zinc-300 px-1.5 py-0.5 rounded text-zinc-600">
-                    {dev.replace('device-', '')}
-                 </span>
+
+              {item.devices.length > 0 ? item.devices.map(dev => (
+                <span
+                  key={dev}
+                  className="text-[10px] font-mono bg-white border border-zinc-300 px-1.5 py-0.5 rounded text-zinc-600"
+                >
+                  {shortId(dev.replace("device-", ""), 5)}
+                </span>
                )) : <span className="text-zinc-300 italic text-xs">No devices</span>}
             </div>
 

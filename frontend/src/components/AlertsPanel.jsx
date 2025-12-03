@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { shortId } from "../utils/format";
 
 export default function AlertsPanel({ items = [], onSelect, onShow }) {
   const [sortField, setSortField] = useState("createdAt");
@@ -75,10 +76,13 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
             onClick={() => onShow?.(src)} 
             className="bg-white border border-rose-100 p-4 rounded-xl shadow-sm hover:shadow-md transition group cursor-pointer"
           >
-            <div className="flex justify-between items-start mb-3">
-                <div className="font-extrabold text-xl text-zinc-800 group-hover:text-rose-600 transition font-mono">
-                    {src.id}
-                </div>
+            <div className="flex justify-between items-start mb-3">   
+              <div 
+                className="font-extrabold text-xl text-zinc-800 group-hover:text-rose-600 transition font-mono"
+                title={src.id}
+              >
+                {shortId(src.id)}
+              </div>
                 <div className="text-xs font-mono text-zinc-500 bg-zinc-100 px-2 py-1 rounded">
                     {src.createdAt?.split('T')[1]?.split('Z')[0] || "--:--:--"}
                 </div>
@@ -91,7 +95,7 @@ export default function AlertsPanel({ items = [], onSelect, onShow }) {
                     <div className="flex flex-wrap gap-1">
                         {src.devices.map(d => (
                             <span key={d} className="text-[10px] font-mono bg-white border border-rose-200 px-1.5 py-0.5 rounded text-rose-700">
-                                {d.replace('device-', '')}
+                                {shortId(d.replace('device-', ''), 5)}
                             </span>
                         ))}
                     </div>
