@@ -44,15 +44,25 @@ class AudioRecorder:
         """
         print(f"Recording for {duration_seconds} seconds...")
         
-        audio_data = sd.rec(
-            int(duration_seconds * self.sample_rate), 
-            samplerate=self.sample_rate, 
-            channels=self.channels, 
-            dtype=self.dtype, 
-            device=self.device
-        )
-        sd.wait()
-
+        try:
+            with sd.InputStream(
+                samplerate=self.sample_rate,
+                channels=self.channels,
+                dtype=self.dtype,
+                callback=self.audio_callback,
+                device=self.device
+            ):
+                print("Recording... Press Ctrl+C to stop early.")
+                sd.sleep(duration_seconds * 1000)
+        except KeyboardInterrupt:
+            print("\nRecording interrupted by user.")
+        
+        if not self.audio_chunks:
+            print("No audio data captured!")
+            return None
+        
+        # Concatenate all chunks
+        audio_data = np.concatenate(self.audio_chunks, axis=0)
         print(f"Recording complete. Captured {len(audio_data)} samples.")
        
                 
