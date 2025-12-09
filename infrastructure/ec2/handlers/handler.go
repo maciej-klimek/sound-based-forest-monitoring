@@ -199,3 +199,30 @@ func (h *Handler) ListAlerts(c *gin.Context) {
 		"alerts": respAlerts,
 	})
 }
+
+func (h *Handler) CleanOldSources(maxAge time.Duration) {
+	allMu.Lock()
+	defer allMu.Unlock()
+
+	cutoff := time.Now().Add(-maxAge)
+	filtered := []processor.SourceGroup{}
+
+	for _, sg := range allSources {
+		hasRecent := false
+		for _, alert := range sg.Alerts {
+			if alert != nil {
+				ts, _ := time.Parse(time.RFC3339, alert.CreatedAt)
+				if ts.After(cutoff) {
+					hasRecent = true
+					break
+				}
+			}
+		}
+		if hasRecent {
+			filtered = append(filtered, sg)
+		}
+	}
+
+	h.logger.Printf("Cleaned old sources: %d -> %d", len(allSources), len(filtered))
+	allSources = filtered
+}
