@@ -3,7 +3,7 @@ Audio processing module for sound analysis and filtering.
 Detects chainsaw sounds using bandpass filtering and FFT analysis.
 """
 
-import librosa
+from pydub import AudioSegment  
 import numpy as np
 from scipy.signal import butter, sosfilt
 import soundfile as sf
@@ -35,8 +35,16 @@ def analyze_audio(audio_path, lowcut=500, highcut=8000):
     :return: Dictionary with analysis results
     """
     # Load audio file
-    data, sr = librosa.load(audio_path)
-    
+    audio = AudioSegment.from_file(audio_path)
+    sr = audio.frame_rate
+    if audio.channels > 1:
+        audio = audio.set_channels(1)
+    data = np.array(audio.get_array_of_samples())
+
+    if audio.sample_width == 2: # 16-bit
+        data = data.astype(np.float32) / 2**15
+    elif audio.sample_width == 4: # 32-bit
+        data = data.astype(np.float32) / 2**31
     # Apply bandpass filter (chainsaw frequencies typically 500-8000 Hz)
     data_filtered = bandpass_filter(data, lowcut, highcut, sr)
     
