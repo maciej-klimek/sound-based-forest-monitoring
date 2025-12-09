@@ -51,7 +51,8 @@ class AudioRecorder:
                 channels=self.channels,
                 dtype=self.dtype,
                 callback=self.audio_callback,
-                device=self.device
+                device=self.device,
+                latency='high'
             ):
                 print("Recording... Press Ctrl+C to stop early.")
                 sd.sleep(duration_seconds * 1000)
