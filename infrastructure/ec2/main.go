@@ -44,6 +44,14 @@ func main() {
 	mem := processor.NewMemory(2 * time.Minute)
 	h := handlers.NewHandler(repo, mem, logger)
 
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			h.CleanOldSources(5 * time.Minute)
+		}
+	}()
+
 	r := router.SetupRouter(h)
 	go func() {
 		port := ":8080"
