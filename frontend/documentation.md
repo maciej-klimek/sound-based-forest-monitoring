@@ -587,15 +587,6 @@ W razie problemów:
 
 ---
 
-## 11. Ograniczenia i możliwe usprawnienia (frontend)
-
-* pollowanie co 10 s zamiast wsparcia dla WebSocket/SSE,
-* frontend zakłada poprawny format odpowiedzi – walidacja jest uproszczona,
-* geokoder Nominatim wywoływany bezpośrednio z przeglądarki (w produkcji warto dodać backend proxy),
-* brak zaawansowanego globalnego store (Redux/Zustand) – na obecne potrzeby hooki są wystarczające, ale przy rozbudowie warto rozważyć taki krok.
-
----
-
 ## 12. Podsumowanie
 
 Frontend systemu **Sound-Based Forest Monitoring**:
