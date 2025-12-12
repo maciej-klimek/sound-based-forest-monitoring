@@ -120,3 +120,5 @@ def send_alert(device_id: str, latitude: float, longitude: float, audio_file_pat
         if hasattr(e.response, 'text'):
             print(f"  - Server error details: {e.response.text}")
         return False
+    
+    #sala 102

@@ -9,5 +9,7 @@
   "audio_device": null,
   "chainsaw_threshold": 1000,
   "bandpass_low": 500,
-  "bandpass_high": 8000
+  "bandpass_high": 8000,
+  "ml_model_path": "chainsaw_model.tflite",
+  "ml_threshold": 0.5
 }

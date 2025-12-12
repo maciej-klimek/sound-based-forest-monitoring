@@ -17,6 +17,15 @@ from audio_recorder import AudioRecorder, MockAudioRecorder
 from audio_processor import analyze_audio, is_chainsaw_detected
 from aws_comunicator import register_device, send_alert
 
+# ML Chainsaw Detector
+try:
+    import tensorflow as tf
+    from chainsaw_detector import preprocess_audio, run_inference
+    ML_DETECTOR_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: ML detector not available ({e}). Using DSP-only detection.")
+    ML_DETECTOR_AVAILABLE = False
+
 
 class ForestMonitoringSystem:
     """Complete forest monitoring system."""
@@ -35,6 +44,13 @@ class ForestMonitoringSystem:
         self.device_id = None
         self.device_secret = None
         self._load_or_register_device()
+        
+        # Initialize ML model if available
+        self.ml_interpreter = None
+        self.ml_input_details = None
+        self.ml_output_details = None
+        if ML_DETECTOR_AVAILABLE:
+            self._load_ml_model()
         
         # Initialize components
         if mock_mode:
@@ -112,6 +128,25 @@ class ForestMonitoringSystem:
             print("ERROR: Failed to register device!")
             sys.exit(1)
     
+    def _load_ml_model(self):
+        """Load TensorFlow Lite ML model for chainsaw detection."""
+        model_path = self.config.get('ml_model_path', 'chainsaw_model.tflite')
+        
+        if not os.path.exists(model_path):
+            print(f"Warning: ML model not found at '{model_path}'. Using DSP-only detection.")
+            return
+        
+        try:
+            print(f"Loading ML chainsaw detector model: {model_path}")
+            self.ml_interpreter = tf.lite.Interpreter(model_path=model_path)
+            self.ml_interpreter.allocate_tensors()
+            self.ml_input_details = self.ml_interpreter.get_input_details()
+            self.ml_output_details = self.ml_interpreter.get_output_details()
+            print("ML model loaded successfully")
+        except Exception as e:
+            print(f"Warning: Failed to load ML model: {e}")
+            self.ml_interpreter = None
+    
     def process_sound_event(self):
         """Process a detected sound event."""
         print("\n" + "="*60)
@@ -142,24 +177,60 @@ class ForestMonitoringSystem:
             print(f"  Peak frequency: {analysis['peak_frequency']:.2f} Hz")
             print(f"  Average energy: {analysis['average_energy']:.2f}")
             
-            # Check if it's a chainsaw
-            is_chainsaw = is_chainsaw_detected(
+            # Check if it's a chainsaw (DSP analysis)
+            is_chainsaw_dsp = is_chainsaw_detected(
                 analysis, 
                 threshold=self.config['chainsaw_threshold']
             )
             
-            if is_chainsaw:
-                print("  ⚠️  CHAINSAW DETECTED!")
+            if is_chainsaw_dsp:
+                print(" DSP: CHAINSAW DETECTED!")
             else:
-                print("  ℹ️  No chainsaw pattern detected")
+                print("  DSP: No chainsaw pattern detected")
         
         except Exception as e:
             print(f"ERROR analyzing audio: {e}")
-            is_chainsaw = False
+            is_chainsaw_dsp = False
         
-        # Send alert to AWS ONLY if chainsaw detected
-        if is_chainsaw:
-            print("\n[3/4] 🚨 Chainsaw detected! Sending alert to AWS...")
+        # ML model verification (if DSP detected chainsaw)
+        is_chainsaw_ml = False
+        if is_chainsaw_dsp and self.ml_interpreter is not None:
+            print("\n[3/4] ML Model verification...")
+            try:
+                ml_score = run_inference(
+                    self.ml_interpreter,
+                    self.ml_input_details,
+                    self.ml_output_details,
+                    audio_path
+                )
+                
+                if ml_score is not None:
+                    ml_percentage = ml_score * 100
+                    ml_threshold = self.config.get('ml_threshold', 0.5)
+                    is_chainsaw_ml = ml_score > ml_threshold
+                    
+                    print(f"  ML confidence: {ml_percentage:.2f}%")
+                    if is_chainsaw_ml:
+                        print(f"ML CONFIRMED: Chainsaw detected (threshold: {ml_threshold*100:.0f}%)")
+                    else:
+                        print(f"ML REJECTED: Not a chainsaw (threshold: {ml_threshold*100:.0f}%)")
+                else:
+                    print("ML inference failed, using DSP result only")
+                    is_chainsaw_ml = True  # Fallback to DSP result
+            except Exception as e:
+                print(f"  ERROR in ML verification: {e}")
+                is_chainsaw_ml = True  # Fallback to DSP result
+        elif is_chainsaw_dsp:
+            # DSP detected but no ML model available
+            print("\n[3/4]ML model not available, using DSP result only")
+            is_chainsaw_ml = True
+        
+        # Final decision: Both DSP and ML must agree (if ML available)
+        is_chainsaw_confirmed = is_chainsaw_dsp and is_chainsaw_ml
+        
+        # Send alert to AWS ONLY if chainsaw confirmed
+        if is_chainsaw_confirmed:
+            print("\n[4/4] Chainsaw CONFIRMED! Sending alert to AWS...")
             success = send_alert(
                 device_id=self.device_id,
                 latitude=self.config['latitude'],
@@ -168,12 +239,15 @@ class ForestMonitoringSystem:
             )
             
             if success:
-                print("\n[4/4] ✅ Alert sent successfully!")
+                print("Alert sent successfully!")
             else:
-                print("\n[4/4] ❌ Failed to send alert!")
+                print("Failed to send alert!")
         else:
-            print("\n[3/4] ℹ️  No chainsaw detected - alert NOT sent")
-            print("[4/4] Continuing monitoring...")
+            if is_chainsaw_dsp and not is_chainsaw_ml:
+                print("\n[4/4] DSP detected but ML rejected - alert NOT sent")
+            else:
+                print("\n[4/4] No chainsaw detected - alert NOT sent")
+            print("Continuing monitoring...")
         
         print("="*60 + "\n")
     

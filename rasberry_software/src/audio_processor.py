@@ -3,7 +3,15 @@ Audio processing module for sound analysis and filtering.
 Detects chainsaw sounds using bandpass filtering and FFT analysis.
 """
 
-from pydub import AudioSegment  
+
+is_librosa_available = False
+try:
+    import librosa
+    is_librosa_available = True
+except ImportError:
+    print("librosa not found, some functionalities may be limited.")
+    from pydub import AudioSegment  
+
 import numpy as np
 from scipy.signal import butter, sosfilt
 import soundfile as sf
@@ -35,6 +43,7 @@ def analyze_audio(audio_path, lowcut=500, highcut=8000):
     :return: Dictionary with analysis results
     """
     # Load audio file
+<<<<<<< HEAD
     audio = AudioSegment.from_file(audio_path)
     sr = audio.frame_rate
     if audio.channels > 1:
@@ -45,6 +54,21 @@ def analyze_audio(audio_path, lowcut=500, highcut=8000):
         data = data.astype(np.float32) / 2**15
     elif audio.sample_width == 4: # 32-bit
         data = data.astype(np.float32) / 2**31
+=======
+    if is_librosa_available:
+        data, sr = librosa.load(audio_path, sr=None, mono=True)
+    else:
+        audio = AudioSegment.from_file(audio_path)
+        sr = audio.frame_rate
+        if audio.channels > 1:
+            audio = audio.set_channels(1)
+        data = np.array(audio.get_array_of_samples())
+
+        if audio.sample_width == 2: # 16-bit
+            data = data.astype(np.float32) / 2**15
+        elif audio.sample_width == 4: # 32-bit
+            data = data.astype(np.float32) / 2**31
+>>>>>>> a5de107 (Add ML model integration for chainsaw detection; update configuration and processing logic)
     # Apply bandpass filter (chainsaw frequencies typically 500-8000 Hz)
     data_filtered = bandpass_filter(data, lowcut, highcut, sr)
     
