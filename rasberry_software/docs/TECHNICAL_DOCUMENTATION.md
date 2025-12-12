@@ -420,12 +420,6 @@ def send_alert(device_id, latitude, longitude, audio_file_path):
 }
 ```
 
-**Rozważane rozwiązania:**
-1. ~~MQTT protocol~~ - wymaga brokera, bardziej skomplikowane
-2. ~~WebSockets~~ - overkill dla periodycznych alertów
-3. ✅ **HTTP REST** - prosty, niezawodny, łatwy debugging
-4. ~~Multipart form data~~ - base64 w JSON łatwiejsze w obsłudze
-
 **Źródła:**
 - [requests library](https://requests.readthedocs.io/)
 - [Base64 encoding](https://docs.python.org/3/library/base64.html)
@@ -523,19 +517,6 @@ Audio saved to: recordings/recording_20251212_142542.wav
      Continuing monitoring...
 ════════════════════════════════════════════════════════════
 ```
-
-### 4.3. Parametry wydajnościowe
-
-| Etap | Czas wykonania | Użycie CPU | Użycie RAM |
-|------|----------------|------------|------------|
-| GPIO Detection | <0.1s | ~1% | ~2MB |
-| Audio Recording (10s) | ~10s | ~15% | ~20MB |
-| DSP Analysis | ~2-3s | ~80% | ~50MB |
-| ML Inference | ~5-7s | ~90% | ~100MB |
-| AWS Communication | ~3-5s | ~10% | ~10MB |
-| **TOTAL** | **~20-25s** | **peak 90%** | **peak 150MB** |
-
-*Testy wykonane na Raspberry Pi 4 Model B (4GB RAM)*
 
 ---
 
